@@ -1,6 +1,24 @@
-type ExampleEntity @entity {
+type Request @entity {
   id: ID!
-  count: BigInt!
-  creator: Bytes! # address
-  token: Bytes! # address
+  requestId: BigInt!
+  creator: Bytes!
+  requester: Bytes!
+  amount: BigInt!
+  tokenId: BigInt!
+  tokenUri: String!
+  tokenAddress: Bytes!
+  refunded: Boolean!
+  delivered: Boolean!
+  txHash: Bytes!
+  block: BigInt!
+  timestamp: BigInt!
+}
+
+type Creator @entity {
+  id: ID!
+  address: Bytes!
+  tokenAddress: Bytes!
+  txHash: Bytes!
+  block: BigInt!
+  timestamp: BigInt!
 }

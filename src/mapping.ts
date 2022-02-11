@@ -1,68 +1,98 @@
-import { BigInt } from "@graphprotocol/graph-ts"
 import {
-  CliptoExchange,
   CreatorRegistered,
   DeliveredRequest,
   NewRequest,
   OwnershipTransferred,
   RefundedRequest,
   RequestUpdated
-} from "../generated/CliptoExchange/CliptoExchange"
-import { ExampleEntity } from "../generated/schema"
+} from "../generated/CliptoExchange/CliptoExchange";
+import { Creator, Request } from "../generated/schema";
 
 export function handleCreatorRegistered(event: CreatorRegistered): void {
-  // Entities can be loaded from the store using a string ID; this ID
-  // needs to be unique across all entities of the same type
-  let entity = ExampleEntity.load(event.transaction.from.toHex())
+  let creator = Creator.load(event.transaction.from.toHex());
 
-  // Entities only exist after they have been saved to the store;
-  // `null` checks allow to create entities on demand
-  if (!entity) {
-    entity = new ExampleEntity(event.transaction.from.toHex())
-
-    // Entity fields can be set using simple assignments
-    entity.count = BigInt.fromI32(0)
+  if (creator == null) {
+    creator = new Creator(event.transaction.from.toHex());
   }
 
-  // BigInt and BigDecimal math are supported
-  entity.count = entity.count + BigInt.fromI32(1)
-
-  // Entity fields can be set based on event parameters
-  entity.creator = event.params.creator
-  entity.token = event.params.token
-
-  // Entities can be written to the store with `.save()`
-  entity.save()
-
-  // Note: If a handler doesn't require existing field values, it is faster
-  // _not_ to load the entity from the store. Instead, create it fresh with
-  // `new Entity(...)`, set the fields that should be updated and save the
-  // entity back to the store. Fields that were not set or unset remain
-  // unchanged, allowing for partial updates to be applied.
-
-  // It is also possible to access smart contracts from mappings. For
-  // example, the contract that has emitted the event can be connected to
-  // with:
-  //
-  // let contract = Contract.bind(event.address)
-  //
-  // The following functions can then be called on this contract to access
-  // state variables and other data:
-  //
-  // - contract.TOKEN_IMPLEMENTATION(...)
-  // - contract.creators(...)
-  // - contract.feeRate(...)
-  // - contract.owner(...)
-  // - contract.requests(...)
-  // - contract.scale(...)
+  creator.tokenAddress = event.params.token;
+  creator.address = event.params.creator;
+  creator.txHash = event.transaction.hash;
+  creator.block = event.block.number;
+  creator.timestamp = event.block.timestamp;
+  creator.save();
 }
 
-export function handleDeliveredRequest(event: DeliveredRequest): void {}
+export function handleNewRequest(event: NewRequest): void {
+  let request = Request.load(event.params.creator.toHex() + "-" + event.params.index.toHex());
 
-export function handleNewRequest(event: NewRequest): void {}
+  if (request == null) {
+    request = new Request(event.params.creator.toHex() + "-" + event.params.index.toHex());
+  }
 
-export function handleOwnershipTransferred(event: OwnershipTransferred): void {}
+  request.creator = event.params.creator;
+  request.requester = event.params.requester;
+  request.requestId = event.params.index;
+  request.amount = event.params.amount;
+  request.txHash = event.transaction.hash;
+  request.block = event.block.number;
+  request.timestamp = event.block.timestamp;
+  request.refunded = false;
+  request.delivered = false;
 
-export function handleRefundedRequest(event: RefundedRequest): void {}
+  request.save();
+}
 
-export function handleRequestUpdated(event: RequestUpdated): void {}
+export function handleDeliveredRequest(event: DeliveredRequest): void {
+  let request = Request.load(event.params.creator.toHex() + "-" + event.params.index.toHex());
+
+  if (request == null) {
+    request = new Request(event.params.creator.toHex() + "-" + event.params.index.toHex());
+  }
+
+  request.creator = event.params.creator;
+  request.requester = event.params.requester;
+  request.requestId = event.params.index;
+  request.amount = event.params.amount;
+  request.tokenId = event.params.tokenId;
+  request.tokenAddress = event.params.tokenAddress;
+  request.txHash = event.transaction.hash;
+  request.block = event.block.number;
+  request.timestamp = event.block.timestamp;
+  request.delivered = true;
+
+  request.save();
+}
+
+export function handleRefundedRequest(event: RefundedRequest): void {
+  let request = Request.load(event.params.creator.toHex() + "-" + event.params.index.toHex());
+
+  if (request == null) {
+    request = new Request(event.params.creator.toHex() + "-" + event.params.index.toHex());
+  }
+
+  request.creator = event.params.creator;
+  request.requester = event.params.requester;
+  request.requestId = event.params.index;
+  request.amount = event.params.amount;
+  request.txHash = event.transaction.hash;
+  request.block = event.block.number;
+  request.timestamp = event.block.timestamp;
+  request.refunded = true;
+  request.save();
+}
+
+export function handleRequestUpdated(event: RequestUpdated): void {
+  let request = Request.load(event.params.creator.toHex() + "-" + event.params.index.toHex());
+
+  if (request == null) {
+    request = new Request(event.params.creator.toHex() + "-" + event.params.index.toHex());
+  }
+  request.amount = event.params.amountIncreased;
+  request.txHash = event.transaction.hash;
+  request.block = event.block.number;
+  request.timestamp = event.block.timestamp;
+  request.save();
+}
+
+export function handleOwnershipTransferred(event: OwnershipTransferred): void { }
