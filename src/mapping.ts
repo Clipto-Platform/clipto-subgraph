@@ -1,3 +1,4 @@
+import { log } from "@graphprotocol/graph-ts";
 import {
   CreatorRegistered,
   DeliveredRequest,
@@ -6,6 +7,7 @@ import {
   RefundedRequest,
   RequestUpdated
 } from "../generated/CliptoExchange/CliptoExchange";
+import { ERC721 } from "../generated/CliptoExchange/ERC721";
 import { Creator, Request } from "../generated/schema";
 
 export function handleCreatorRegistered(event: CreatorRegistered): void {
@@ -60,6 +62,11 @@ export function handleDeliveredRequest(event: DeliveredRequest): void {
   request.block = event.block.number;
   request.timestamp = event.block.timestamp;
   request.delivered = true;
+
+  let token = ERC721.bind(event.params.tokenAddress);
+  let tokenUri = token.try_tokenURI(event.params.tokenId);
+  if(!tokenUri.reverted)
+    request.tokenUri = tokenUri.value;
 
   request.save();
 }
