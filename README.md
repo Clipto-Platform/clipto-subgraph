@@ -19,3 +19,7 @@ $ graph auth --product hosted-service <access-token>
 ```shell
 $ graph deploy --product hosted-service <username/subgraph name>
 ```
+
+## Mainnet Deployment
+1. Update subgraph.yml by replacing values mentioned
+2. Use auth-token for Mainnet Graph Project with the deploy command

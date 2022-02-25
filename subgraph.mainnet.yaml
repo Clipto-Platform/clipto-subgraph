@@ -1,0 +1,37 @@
+specVersion: 0.0.2
+schema:
+  file: ./schema.graphql
+dataSources:
+  - kind: ethereum
+    name: CliptoExchange
+    network: <NETWORK>
+    source:
+      address: "CLIPTO_DEPLOYED_ADDRESS"
+      abi: CliptoExchange
+      startBlock: <START_BLOCK>
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.5
+      language: wasm/assemblyscript
+      entities:
+        - Creator
+        - Request
+      abis:
+        - name: CliptoExchange
+          file: ./abis/CliptoExchange.json
+        - name: ERC721
+          file: ./abis/ERC721.json
+      eventHandlers:
+        - event: CreatorRegistered(indexed address,indexed address)
+          handler: handleCreatorRegistered
+        - event: DeliveredRequest(indexed address,indexed address,uint256,uint256,address,uint256)
+          handler: handleDeliveredRequest
+        - event: NewRequest(indexed address,indexed address,uint256,uint256)
+          handler: handleNewRequest
+        - event: OwnershipTransferred(indexed address,indexed address)
+          handler: handleOwnershipTransferred
+        - event: RefundedRequest(indexed address,indexed address,uint256,uint256)
+          handler: handleRefundedRequest
+        - event: RequestUpdated(indexed address,indexed address,uint256,uint256)
+          handler: handleRequestUpdated
+      file: ./src/mapping.ts
