@@ -1,20 +1,21 @@
-import { log } from "@graphprotocol/graph-ts";
+import { json } from "@graphprotocol/graph-ts";
 import {
   CreatorRegistered,
+  CreatorUpdated,
   DeliveredRequest,
   NewRequest,
   OwnershipTransferred,
   RefundedRequest,
-  RequestUpdated
+  RequestUpdated,
 } from "../generated/CliptoExchange/CliptoExchange";
 import { ERC721 } from "../generated/CliptoExchange/ERC721";
 import { Creator, Request } from "../generated/schema";
 
 export function handleCreatorRegistered(event: CreatorRegistered): void {
-  let creator = Creator.load(event.transaction.from.toHex());
+  let creator = Creator.load(event.params.creator.toHex());
 
   if (creator == null) {
-    creator = new Creator(event.transaction.from.toHex());
+    creator = new Creator(event.params.creator.toHex());
   }
 
   creator.tokenAddress = event.params.token;
@@ -25,14 +26,22 @@ export function handleCreatorRegistered(event: CreatorRegistered): void {
   creator.save();
 }
 
+export function handleCreatorUpdated(event: CreatorUpdated): void {
+  // update this
+}
+
 export function handleNewRequest(event: NewRequest): void {
-  let request = Request.load(event.params.creator.toHex() + "-" + event.params.index.toHex());
+  let request = Request.load(
+    event.params.creator.toHex() + "-" + event.params.index.toHex()
+  );
 
   if (request == null) {
-    request = new Request(event.params.creator.toHex() + "-" + event.params.index.toHex());
+    request = new Request(
+      event.params.creator.toHex() + "-" + event.params.index.toHex()
+    );
   }
 
-  request.creator = event.params.creator;
+  request.creator = event.params.creator.toHex();
   request.requester = event.params.requester;
   request.requestId = event.params.index;
   request.amount = event.params.amount;
@@ -42,17 +51,29 @@ export function handleNewRequest(event: NewRequest): void {
   request.refunded = false;
   request.delivered = false;
 
+  let data = json.fromString(event.params.data);
+  let description = data.toObject().get("description");
+  if (description && !description.isNull())
+    request.description = description.toString();
+
+  let deadline = data.toObject().get("deadline");
+  if (deadline && !deadline.isNull()) request.deadline = deadline.toU64();
+
   request.save();
 }
 
 export function handleDeliveredRequest(event: DeliveredRequest): void {
-  let request = Request.load(event.params.creator.toHex() + "-" + event.params.index.toHex());
+  let request = Request.load(
+    event.params.creator.toHex() + "-" + event.params.index.toHex()
+  );
 
   if (request == null) {
-    request = new Request(event.params.creator.toHex() + "-" + event.params.index.toHex());
+    request = new Request(
+      event.params.creator.toHex() + "-" + event.params.index.toHex()
+    );
   }
 
-  request.creator = event.params.creator;
+  request.creator = event.params.creator.toHex();
   request.requester = event.params.requester;
   request.requestId = event.params.index;
   request.amount = event.params.amount;
@@ -65,20 +86,23 @@ export function handleDeliveredRequest(event: DeliveredRequest): void {
 
   let token = ERC721.bind(event.params.tokenAddress);
   let tokenUri = token.try_tokenURI(event.params.tokenId);
-  if(!tokenUri.reverted)
-    request.tokenUri = tokenUri.value;
+  if (!tokenUri.reverted) request.tokenUri = tokenUri.value;
 
   request.save();
 }
 
 export function handleRefundedRequest(event: RefundedRequest): void {
-  let request = Request.load(event.params.creator.toHex() + "-" + event.params.index.toHex());
+  let request = Request.load(
+    event.params.creator.toHex() + "-" + event.params.index.toHex()
+  );
 
   if (request == null) {
-    request = new Request(event.params.creator.toHex() + "-" + event.params.index.toHex());
+    request = new Request(
+      event.params.creator.toHex() + "-" + event.params.index.toHex()
+    );
   }
 
-  request.creator = event.params.creator;
+  request.creator = event.params.creator.toHex();
   request.requester = event.params.requester;
   request.requestId = event.params.index;
   request.amount = event.params.amount;
@@ -90,10 +114,14 @@ export function handleRefundedRequest(event: RefundedRequest): void {
 }
 
 export function handleRequestUpdated(event: RequestUpdated): void {
-  let request = Request.load(event.params.creator.toHex() + "-" + event.params.index.toHex());
+  let request = Request.load(
+    event.params.creator.toHex() + "-" + event.params.index.toHex()
+  );
 
   if (request == null) {
-    request = new Request(event.params.creator.toHex() + "-" + event.params.index.toHex());
+    request = new Request(
+      event.params.creator.toHex() + "-" + event.params.index.toHex()
+    );
   }
   request.amount = event.params.amountIncreased;
   request.txHash = event.transaction.hash;
@@ -102,4 +130,4 @@ export function handleRequestUpdated(event: RequestUpdated): void {
   request.save();
 }
 
-export function handleOwnershipTransferred(event: OwnershipTransferred): void { }
+export function handleOwnershipTransferred(event: OwnershipTransferred): void {}

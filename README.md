@@ -1,5 +1,7 @@
 ## Clipto Graph
 
+This subgraph indexes for v2 architecture (using graph for all data storage)
+
 1. Generate types for current contract
 ```shell
 $ graph codegen

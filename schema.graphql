@@ -1,7 +1,23 @@
+type Creator @entity {
+  id: ID!
+  address: Bytes!
+  tokenAddress: Bytes!
+  twitterHandle: String!
+  bio: String!
+  deliveryTime: Int!
+  demos: [String!]!
+  profilePicture: String!
+  userName: String!
+  price: BigInt!
+  txHash: Bytes!
+  block: BigInt!
+  timestamp: BigInt!
+}
+
 type Request @entity {
   id: ID!
   requestId: BigInt!
-  creator: Bytes!
+  creator: Creator!
   requester: Bytes!
   amount: BigInt!
   tokenId: BigInt!
@@ -9,15 +25,8 @@ type Request @entity {
   tokenAddress: Bytes!
   refunded: Boolean!
   delivered: Boolean!
-  txHash: Bytes!
-  block: BigInt!
-  timestamp: BigInt!
-}
-
-type Creator @entity {
-  id: ID!
-  address: Bytes!
-  tokenAddress: Bytes!
+  description: String!
+  deadline: Int!
   txHash: Bytes!
   block: BigInt!
   timestamp: BigInt!
