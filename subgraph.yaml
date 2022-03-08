@@ -8,6 +8,7 @@ dataSources:
     source:
       address: "0x1e4Cad2a4b0f7FA8ACfe3540851d3563C27ceE20"
       abi: CliptoExchange
+      startBlock: 24789312
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.5

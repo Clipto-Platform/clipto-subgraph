@@ -1,4 +1,4 @@
-import { json } from "@graphprotocol/graph-ts";
+import { BigDecimal, BigInt, json, JSONValue, JSONValueKind, log } from "@graphprotocol/graph-ts";
 import {
   CreatorRegistered,
   CreatorUpdated,
@@ -11,23 +11,81 @@ import {
 import { ERC721 } from "../generated/CliptoExchange/ERC721";
 import { Creator, Request } from "../generated/schema";
 
+function getString(value: JSONValue | null): string {
+  if (!value) return "";
+  if (value.kind == JSONValueKind.STRING) return value.toString();
+  return value.data.toString();
+}
+
+function getInt(value: JSONValue | null): BigInt {
+  if (!value) return BigInt.fromI64(-1);
+  if (value.kind == JSONValueKind.STRING) return BigInt.fromString(value.toString());
+  if (value.kind == JSONValueKind.NUMBER) return value.toBigInt();
+  return BigInt.fromI64(value.data);
+}
+
+function getDecimal(value: JSONValue | null): BigDecimal {
+  if (!value) return BigDecimal.fromString("0");
+  if (value.kind == JSONValueKind.STRING) return BigDecimal.fromString(value.toString());
+  if (value.kind == JSONValueKind.NUMBER) return BigDecimal.fromString(value.toF64().toString());
+  return BigDecimal.fromString("0"); 
+}
+
+function getArray(value: JSONValue | null): Array<string> {
+  if(!value) return new Array<string>();
+  return value.toArray().map<string>((v) => getString(v)); 
+}
+
 export function handleCreatorRegistered(event: CreatorRegistered): void {
   let creator = Creator.load(event.params.creator.toHex());
 
   if (creator == null) {
     creator = new Creator(event.params.creator.toHex());
   }
-
   creator.tokenAddress = event.params.token;
   creator.address = event.params.creator;
   creator.txHash = event.transaction.hash;
   creator.block = event.block.number;
   creator.timestamp = event.block.timestamp;
+
+  let checkData = json.try_fromString(event.params.data);
+  if (checkData.isOk) {
+    let data = checkData.value.toObject();
+  
+    creator.twitterHandle = getString(data.get("twitterHandle"));
+    creator.bio = getString(data.get("bio"));
+    creator.deliveryTime = getInt(data.get("deliveryTime"));
+    creator.profilePicture = getString(data.get("profilePicture"));
+    creator.userName = getString(data.get("userName"));
+    creator.price = getDecimal(data.get("price"));
+    creator.demos = getArray(data.get("demos"));
+  }
+
   creator.save();
 }
 
 export function handleCreatorUpdated(event: CreatorUpdated): void {
-  // update this
+  let creator = Creator.load(event.params.creator.toHex());
+
+  if (creator == null) {
+    creator = new Creator(event.params.creator.toHex());
+  }
+  creator.address = event.params.creator;
+
+  let checkData = json.try_fromString(event.params.data);
+  if (checkData.isOk) {
+    let data = checkData.value.toObject();
+  
+    creator.twitterHandle = getString(data.get("twitterHandle"));
+    creator.bio = getString(data.get("bio"));
+    creator.deliveryTime = getInt(data.get("deliveryTime"));
+    creator.profilePicture = getString(data.get("profilePicture"));
+    creator.userName = getString(data.get("userName"));
+    creator.price = getDecimal(data.get("price"));
+    creator.demos = getArray(data.get("demos"));
+  }
+
+  creator.save();
 }
 
 export function handleNewRequest(event: NewRequest): void {
@@ -51,13 +109,13 @@ export function handleNewRequest(event: NewRequest): void {
   request.refunded = false;
   request.delivered = false;
 
-  let data = json.fromString(event.params.data);
-  let description = data.toObject().get("description");
-  if (description && !description.isNull())
-    request.description = description.toString();
+  let checkData = json.try_fromString(event.params.data);
+  if (checkData.isOk) {
+    let data = checkData.value.toObject();
 
-  let deadline = data.toObject().get("deadline");
-  if (deadline && !deadline.isNull()) request.deadline = deadline.toU64();
+    request.description = getString(data.get("description"));
+    request.deadline = getInt(data.get("deadline"));
+  }
 
   request.save();
 }

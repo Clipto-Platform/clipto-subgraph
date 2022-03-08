@@ -4,11 +4,11 @@ type Creator @entity {
   tokenAddress: Bytes!
   twitterHandle: String!
   bio: String!
-  deliveryTime: Int!
+  deliveryTime: BigInt!
   demos: [String!]!
   profilePicture: String!
   userName: String!
-  price: BigInt!
+  price: BigDecimal!
   txHash: Bytes!
   block: BigInt!
   timestamp: BigInt!
@@ -26,7 +26,7 @@ type Request @entity {
   refunded: Boolean!
   delivered: Boolean!
   description: String!
-  deadline: Int!
+  deadline: BigInt!
   txHash: Bytes!
   block: BigInt!
   timestamp: BigInt!

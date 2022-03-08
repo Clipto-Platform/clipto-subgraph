@@ -1,5 +1,5 @@
 {
-  "name": "clipto-subgraph",
+  "name": "clipto-subgraph-v2",
   "license": "UNLICENSED",
   "scripts": {
     "codegen": "graph codegen",
@@ -7,7 +7,8 @@
     "deploy": "graph deploy --node https://api.thegraph.com/deploy/ Clipto-Platform/clipto-subgraph",
     "create-local": "graph create --node http://localhost:8020/ Clipto-Platform/clipto-subgraph",
     "remove-local": "graph remove --node http://localhost:8020/ Clipto-Platform/clipto-subgraph",
-    "deploy-local": "graph deploy --node http://localhost:8020/ --ipfs http://localhost:5001 Clipto-Platform/clipto-subgraph"
+    "deploy-local": "graph deploy --node http://localhost:8020/ --ipfs http://localhost:5001 Clipto-Platform/clipto-subgraph",
+    "test": "graph test"
   },
   "dependencies": {
     "@graphprotocol/graph-cli": "0.26.0",
