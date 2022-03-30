@@ -2,6 +2,18 @@
 
 This subgraph indexes for v2 architecture (using graph for all data storage)
 
+0. To generate the subgraph.yaml file
+```shell
+# requires mustache to be install
+$ npm install -g mustache
+
+# for mainnet
+$ npm run prepare:mainnet
+
+# for testnet
+$ npm run prepare:testnet
+```
+
 1. Generate types for current contract
 ```shell
 $ graph codegen
@@ -22,6 +34,23 @@ $ graph auth --product hosted-service <access-token>
 $ graph deploy --product hosted-service <username/subgraph name>
 ```
 
-## Mainnet Deployment
-1. Update subgraph.yml by replacing values mentioned
-2. Use auth-token for Mainnet Graph Project with the deploy command
+## Example Queries
+1. Get all request order by timestamp
+```graphql
+{
+    requests(
+        orderBy: timestamp
+        orderDirection: desc
+    ) {
+        id
+        requestId
+        requester
+        creator {
+            id
+        }
+        amount
+        description
+        delivered
+    }
+}
+```
