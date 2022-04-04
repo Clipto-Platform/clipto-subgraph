@@ -12,6 +12,7 @@ type Creator @entity {
   txHash: Bytes!
   block: BigInt!
   timestamp: BigInt!
+  updated: BigInt!
 }
 
 type Request @entity {
@@ -30,4 +31,5 @@ type Request @entity {
   txHash: Bytes!
   block: BigInt!
   timestamp: BigInt!
+  updated: BigInt!
 }

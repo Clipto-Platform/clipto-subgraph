@@ -6,7 +6,7 @@ dataSources:
     name: CliptoExchange
     network: {{ chain }}
     source:
-      address: {{ address }}
+      address: "{{ address }}"
       abi: CliptoExchange
       startBlock: {{ startBlock }}
     mapping:

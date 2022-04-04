@@ -4,3 +4,4 @@ build/
 subgraph.yaml
 tests/.bin/
 .DS_Store
+.env

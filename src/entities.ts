@@ -23,6 +23,7 @@ export function getOrCreateCreator(id: Address): Creator {
   creator.txHash = NULL_ADDRESS;
   creator.block = BIGINT_ZERO;
   creator.timestamp = BIGINT_ZERO;
+  creator.updated = BIGINT_ZERO;
   creator.save();
 
   return creator;
@@ -50,6 +51,7 @@ export function getOrCreateRequest(id: string): Request {
   request.txHash = NULL_ADDRESS;
   request.block = BIGINT_ZERO;
   request.timestamp = BIGINT_ZERO;
+  request.updated = BIGINT_ZERO;
   request.save();
 
   return request;

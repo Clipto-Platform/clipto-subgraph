@@ -53,6 +53,7 @@ export function handleCreatorUpdated(event: CreatorUpdated): void {
     creator.userName = getString(data.get("userName"));
     creator.price = getDecimal(data.get("price"));
     creator.demos = getArray(data.get("demos"));
+    creator.updated = event.block.timestamp;
   }
 
   creator.save();
@@ -95,7 +96,7 @@ export function handleDeliveredRequest(event: DeliveredRequest): void {
   request.tokenAddress = event.params.tokenAddress;
   request.txHash = event.transaction.hash;
   request.block = event.block.number;
-  request.timestamp = event.block.timestamp;
+  request.updated = event.block.timestamp;
   request.delivered = true;
 
   let erc721Contract = ERC721.bind(event.params.tokenAddress);
@@ -117,7 +118,7 @@ export function handleRefundedRequest(event: RefundedRequest): void {
   request.amount = event.params.amount;
   request.txHash = event.transaction.hash;
   request.block = event.block.number;
-  request.timestamp = event.block.timestamp;
+  request.updated = event.block.timestamp;
   request.refunded = true;
   request.save();
 }
@@ -129,7 +130,7 @@ export function handleRequestUpdated(event: RequestUpdated): void {
   request.amount = event.params.amountIncreased;
   request.txHash = event.transaction.hash;
   request.block = event.block.number;
-  request.timestamp = event.block.timestamp;
+  request.updated = event.block.timestamp;
   request.save();
 }
 
