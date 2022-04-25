@@ -133,5 +133,3 @@ export function handleRequestUpdated(event: RequestUpdated): void {
   request.updated = event.block.timestamp;
   request.save();
 }
-
-export function handleOwnershipTransferred(event: OwnershipTransferred): void {}

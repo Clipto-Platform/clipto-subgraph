@@ -30,8 +30,6 @@ dataSources:
           handler: handleDeliveredRequest
         - event: NewRequest(indexed address,indexed address,uint256,uint256,string)
           handler: handleNewRequest
-        - event: OwnershipTransferred(indexed address,indexed address)
-          handler: handleOwnershipTransferred
         - event: RefundedRequest(indexed address,indexed address,uint256,uint256)
           handler: handleRefundedRequest
         - event: RequestUpdated(indexed address,indexed address,uint256,uint256)
