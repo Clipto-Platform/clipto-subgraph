@@ -16,6 +16,9 @@ dataSources:
       entities:
         - Creator
         - Request
+        - NFTContract
+        - CliptoToken
+        - Transfer
       abis:
         - name: CliptoExchange
           file: ./abis/CliptoExchange.json
@@ -34,4 +37,28 @@ dataSources:
           handler: handleRefundedRequest
         - event: RequestUpdated(indexed address,indexed address,uint256,uint256)
           handler: handleRequestUpdated
-      file: ./src/mapping.ts
+      file: ./src/mappings/exchange.ts
+
+templates:
+  - kind: ethereum
+    name: CliptoToken
+    network: {{ chain }}
+    source:
+      abi: ERC721
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.5
+      language: wasm/assemblyscript
+      entities:
+        - Creator
+        - Request
+        - NFTContract
+        - CliptoToken
+        - Transfer
+      abis:
+        - name: ERC721
+          file: ./abis/ERC721.json
+      eventHandlers:
+        - event: Transfer(indexed address,indexed address,indexed uint256)
+          handler: handleTransfer
+      file: ./src/mappings/token.ts

@@ -4,13 +4,15 @@ import {
   CreatorUpdated,
   DeliveredRequest,
   NewRequest,
-  OwnershipTransferred,
   RefundedRequest,
   RequestUpdated,
-} from "../generated/CliptoExchange/CliptoExchange";
-import { ERC721 } from "../generated/CliptoExchange/ERC721";
-import { getOrCreateCreator, getOrCreateRequest } from "./entities";
-import { getArray, getDecimal, getInt, getString, readValue } from "./utils";
+} from "../../generated/CliptoExchange/CliptoExchange";
+import { ERC721 } from "../../generated/CliptoExchange/ERC721";
+import { CliptoToken as CliptoTokenTemplate } from "../../generated/templates";
+import { getOrCreateCreator } from "../entities/creator";
+import { getOrCreateRequest } from "../entities/request";
+import { getOrCreateNFTContract } from "../entities/token";
+import { getArray, getDecimal, getInt, getString, readValue } from "../utils";
 
 export function handleCreatorRegistered(event: CreatorRegistered): void {
   let creator = getOrCreateCreator(event.params.creator);
@@ -35,6 +37,10 @@ export function handleCreatorRegistered(event: CreatorRegistered): void {
   }
 
   creator.save();
+
+  // starting sync of clipto token
+  CliptoTokenTemplate.create(event.params.token);
+  getOrCreateNFTContract(event.params.token, event);
 }
 
 export function handleCreatorUpdated(event: CreatorUpdated): void {
@@ -63,7 +69,10 @@ export function handleNewRequest(event: NewRequest): void {
   let id = event.params.creator.toHex() + "-" + event.params.index.toHex();
   let request = getOrCreateRequest(id);
 
-  request.creator = event.params.creator.toHex();
+  let creator = getOrCreateCreator(event.params.creator);
+
+  request.creator = creator.id;
+  request.tokenAddress = creator.tokenAddress;
   request.requester = event.params.requester;
   request.requestId = event.params.index;
   request.amount = event.params.amount;
@@ -112,10 +121,6 @@ export function handleRefundedRequest(event: RefundedRequest): void {
   let id = event.params.creator.toHex() + "-" + event.params.index.toHex();
   let request = getOrCreateRequest(id);
 
-  request.creator = event.params.creator.toHex();
-  request.requester = event.params.requester;
-  request.requestId = event.params.index;
-  request.amount = event.params.amount;
   request.txHash = event.transaction.hash;
   request.block = event.block.number;
   request.updated = event.block.timestamp;
