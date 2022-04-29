@@ -4,6 +4,15 @@ enum EventType {
   BURN
 }
 
+type Platform @entity {
+  " address of the main contract "
+  id: ID!
+
+  " contract details "
+  name: String!
+  network: String!
+}
+
 type Account @entity {
   " address of the user "
   id: ID!

@@ -8,13 +8,17 @@ import {
   RequestUpdated,
 } from "../../generated/CliptoExchange/CliptoExchange";
 import { ERC721 } from "../../generated/CliptoExchange/ERC721";
+import { NFTContract } from "../../generated/schema";
 import { CliptoToken as CliptoTokenTemplate } from "../../generated/templates";
 import { getOrCreateCreator } from "../entities/creator";
+import { getOrCreatePlatform } from "../entities/platform";
 import { getOrCreateRequest } from "../entities/request";
 import { getOrCreateNFTContract } from "../entities/token";
 import { getArray, getDecimal, getInt, getString, readValue } from "../utils";
 
 export function handleCreatorRegistered(event: CreatorRegistered): void {
+  getOrCreatePlatform();
+
   let creator = getOrCreateCreator(event.params.creator);
 
   creator.tokenAddress = event.params.token;
@@ -38,9 +42,12 @@ export function handleCreatorRegistered(event: CreatorRegistered): void {
 
   creator.save();
 
-  // starting sync of clipto token
-  CliptoTokenTemplate.create(event.params.token);
-  getOrCreateNFTContract(event.params.token, event);
+  let nftContract = NFTContract.load(event.params.token.toHex());
+  if (nftContract == null) {
+    // starting sync of clipto token
+    CliptoTokenTemplate.create(event.params.token);
+    getOrCreateNFTContract(event.params.token, event);
+  }
 }
 
 export function handleCreatorUpdated(event: CreatorUpdated): void {
