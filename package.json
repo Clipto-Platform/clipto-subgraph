@@ -1,13 +1,21 @@
 {
-  "name": "clipto-subgraph",
+  "name": "clipto-subgraph-v2",
   "license": "UNLICENSED",
+  "repository": {
+    "url": "https://github.com/Clipto-Platform/clipto-subgraph/tree/v2"
+  },
   "scripts": {
-    "codegen": "graph codegen",
-    "build": "graph build",
     "deploy": "graph deploy --node https://api.thegraph.com/deploy/ Clipto-Platform/clipto-subgraph",
     "create-local": "graph create --node http://localhost:8020/ Clipto-Platform/clipto-subgraph",
     "remove-local": "graph remove --node http://localhost:8020/ Clipto-Platform/clipto-subgraph",
-    "deploy-local": "graph deploy --node http://localhost:8020/ --ipfs http://localhost:5001 Clipto-Platform/clipto-subgraph"
+    "deploy-local": "graph deploy --node http://localhost:8020/ --ipfs http://localhost:5001 Clipto-Platform/clipto-subgraph",
+    "format": "prettier --write \"src/**/*.ts\"",
+    "lint": "eslint \"src/**/*.ts\" --fix",
+    "codegen": "graph codegen subgraph.yaml",
+    "build": "rm -rf build && graph build subgraph.yaml",
+    "prepare:mainnet": "mustache config/mainnet.json subgraph.template.yaml > subgraph.yaml",
+    "prepare:testnet": "mustache config/testnet.json subgraph.template.yaml > subgraph.yaml",
+    "test": "graph test"
   },
   "dependencies": {
     "@graphprotocol/graph-cli": "0.26.0",

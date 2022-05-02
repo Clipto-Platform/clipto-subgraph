@@ -1,38 +1,69 @@
-import { log } from "@graphprotocol/graph-ts";
+import { json } from "@graphprotocol/graph-ts";
 import {
   CreatorRegistered,
+  CreatorUpdated,
   DeliveredRequest,
   NewRequest,
   OwnershipTransferred,
   RefundedRequest,
-  RequestUpdated
+  RequestUpdated,
 } from "../generated/CliptoExchange/CliptoExchange";
 import { ERC721 } from "../generated/CliptoExchange/ERC721";
-import { Creator, Request } from "../generated/schema";
+import { getOrCreateCreator, getOrCreateRequest } from "./entities";
+import { getArray, getDecimal, getInt, getString, readValue } from "./utils";
 
 export function handleCreatorRegistered(event: CreatorRegistered): void {
-  let creator = Creator.load(event.transaction.from.toHex());
-
-  if (creator == null) {
-    creator = new Creator(event.transaction.from.toHex());
-  }
+  let creator = getOrCreateCreator(event.params.creator);
 
   creator.tokenAddress = event.params.token;
   creator.address = event.params.creator;
   creator.txHash = event.transaction.hash;
   creator.block = event.block.number;
   creator.timestamp = event.block.timestamp;
+
+  let checkData = json.try_fromString(event.params.data);
+  if (checkData.isOk) {
+    let data = checkData.value.toObject();
+
+    creator.twitterHandle = getString(data.get("twitterHandle"));
+    creator.bio = getString(data.get("bio"));
+    creator.deliveryTime = getInt(data.get("deliveryTime"));
+    creator.profilePicture = getString(data.get("profilePicture"));
+    creator.userName = getString(data.get("userName"));
+    creator.price = getDecimal(data.get("price"));
+    creator.demos = getArray(data.get("demos"));
+  }
+
+  creator.save();
+}
+
+export function handleCreatorUpdated(event: CreatorUpdated): void {
+  let creator = getOrCreateCreator(event.params.creator);
+
+  creator.address = event.params.creator;
+
+  let checkData = json.try_fromString(event.params.data);
+  if (checkData.isOk) {
+    let data = checkData.value.toObject();
+
+    creator.twitterHandle = getString(data.get("twitterHandle"));
+    creator.bio = getString(data.get("bio"));
+    creator.deliveryTime = getInt(data.get("deliveryTime"));
+    creator.profilePicture = getString(data.get("profilePicture"));
+    creator.userName = getString(data.get("userName"));
+    creator.price = getDecimal(data.get("price"));
+    creator.demos = getArray(data.get("demos"));
+    creator.updated = event.block.timestamp;
+  }
+
   creator.save();
 }
 
 export function handleNewRequest(event: NewRequest): void {
-  let request = Request.load(event.params.creator.toHex() + "-" + event.params.index.toHex());
+  let id = event.params.creator.toHex() + "-" + event.params.index.toHex();
+  let request = getOrCreateRequest(id);
 
-  if (request == null) {
-    request = new Request(event.params.creator.toHex() + "-" + event.params.index.toHex());
-  }
-
-  request.creator = event.params.creator;
+  request.creator = event.params.creator.toHex();
   request.requester = event.params.requester;
   request.requestId = event.params.index;
   request.amount = event.params.amount;
@@ -42,17 +73,22 @@ export function handleNewRequest(event: NewRequest): void {
   request.refunded = false;
   request.delivered = false;
 
+  let checkData = json.try_fromString(event.params.data);
+  if (checkData.isOk) {
+    let data = checkData.value.toObject();
+
+    request.description = getString(data.get("description"));
+    request.deadline = getInt(data.get("deadline"));
+  }
+
   request.save();
 }
 
 export function handleDeliveredRequest(event: DeliveredRequest): void {
-  let request = Request.load(event.params.creator.toHex() + "-" + event.params.index.toHex());
+  let id = event.params.creator.toHex() + "-" + event.params.index.toHex();
+  let request = getOrCreateRequest(id);
 
-  if (request == null) {
-    request = new Request(event.params.creator.toHex() + "-" + event.params.index.toHex());
-  }
-
-  request.creator = event.params.creator;
+  request.creator = event.params.creator.toHex();
   request.requester = event.params.requester;
   request.requestId = event.params.index;
   request.amount = event.params.amount;
@@ -60,46 +96,40 @@ export function handleDeliveredRequest(event: DeliveredRequest): void {
   request.tokenAddress = event.params.tokenAddress;
   request.txHash = event.transaction.hash;
   request.block = event.block.number;
-  request.timestamp = event.block.timestamp;
+  request.updated = event.block.timestamp;
   request.delivered = true;
 
-  let token = ERC721.bind(event.params.tokenAddress);
-  let tokenUri = token.try_tokenURI(event.params.tokenId);
-  if(!tokenUri.reverted)
-    request.tokenUri = tokenUri.value;
+  let erc721Contract = ERC721.bind(event.params.tokenAddress);
+  request.tokenUri = readValue<string>(
+    erc721Contract.try_tokenURI(event.params.tokenId),
+    ""
+  );
 
   request.save();
 }
 
 export function handleRefundedRequest(event: RefundedRequest): void {
-  let request = Request.load(event.params.creator.toHex() + "-" + event.params.index.toHex());
+  let id = event.params.creator.toHex() + "-" + event.params.index.toHex();
+  let request = getOrCreateRequest(id);
 
-  if (request == null) {
-    request = new Request(event.params.creator.toHex() + "-" + event.params.index.toHex());
-  }
-
-  request.creator = event.params.creator;
+  request.creator = event.params.creator.toHex();
   request.requester = event.params.requester;
   request.requestId = event.params.index;
   request.amount = event.params.amount;
   request.txHash = event.transaction.hash;
   request.block = event.block.number;
-  request.timestamp = event.block.timestamp;
+  request.updated = event.block.timestamp;
   request.refunded = true;
   request.save();
 }
 
 export function handleRequestUpdated(event: RequestUpdated): void {
-  let request = Request.load(event.params.creator.toHex() + "-" + event.params.index.toHex());
+  let id = event.params.creator.toHex() + "-" + event.params.index.toHex();
+  let request = getOrCreateRequest(id);
 
-  if (request == null) {
-    request = new Request(event.params.creator.toHex() + "-" + event.params.index.toHex());
-  }
   request.amount = event.params.amountIncreased;
   request.txHash = event.transaction.hash;
   request.block = event.block.number;
-  request.timestamp = event.block.timestamp;
+  request.updated = event.block.timestamp;
   request.save();
 }
-
-export function handleOwnershipTransferred(event: OwnershipTransferred): void { }

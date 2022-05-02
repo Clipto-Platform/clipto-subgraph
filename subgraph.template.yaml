@@ -4,11 +4,11 @@ schema:
 dataSources:
   - kind: ethereum
     name: CliptoExchange
-    network: <NETWORK>
+    network: {{ chain }}
     source:
-      address: "CLIPTO_DEPLOYED_ADDRESS"
+      address: "{{ address }}"
       abi: CliptoExchange
-      startBlock: <START_BLOCK>
+      startBlock: {{ startBlock }}
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.5
@@ -22,14 +22,14 @@ dataSources:
         - name: ERC721
           file: ./abis/ERC721.json
       eventHandlers:
-        - event: CreatorRegistered(indexed address,indexed address)
+        - event: CreatorRegistered(indexed address,indexed address,string)
           handler: handleCreatorRegistered
+        - event: CreatorUpdated(indexed address,string)
+          handler: handleCreatorUpdated
         - event: DeliveredRequest(indexed address,indexed address,uint256,uint256,address,uint256)
           handler: handleDeliveredRequest
-        - event: NewRequest(indexed address,indexed address,uint256,uint256)
+        - event: NewRequest(indexed address,indexed address,uint256,uint256,string)
           handler: handleNewRequest
-        - event: OwnershipTransferred(indexed address,indexed address)
-          handler: handleOwnershipTransferred
         - event: RefundedRequest(indexed address,indexed address,uint256,uint256)
           handler: handleRefundedRequest
         - event: RequestUpdated(indexed address,indexed address,uint256,uint256)
