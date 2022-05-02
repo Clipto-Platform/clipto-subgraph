@@ -1,35 +1,211 @@
-type Creator @entity {
+enum EventType {
+  MINT
+  TRANSFER
+  BURN
+}
+
+type Platform @entity {
+  " address of the main contract "
   id: ID!
+
+  " contract details "
+  name: String!
+  network: String!
+}
+
+type Account @entity {
+  " address of the user "
+  id: ID!
+
+  nftOwned: [CliptoToken!]! @derivedFrom(field: "originalRequester")
+}
+
+type Creator @entity {
+  " address of the creator "
+  id: ID!
+
+  " address of the creator "
   address: Bytes!
+
+  " nft contract address for the creator "
   tokenAddress: Bytes!
+
+  " twitter handle of the creator "
   twitterHandle: String!
+
+  " bio description of the creator "
   bio: String!
+
+  " min delivery time for the creator "
   deliveryTime: BigInt!
+
+  " sample work, links of video of the creator "
   demos: [String!]!
+
+  " profile pic link of the creator "
   profilePicture: String!
+
+  " user name of the creator "
   userName: String!
+
+  " min price accepted for each request "
   price: BigDecimal!
+
+  " transaction hash of the creator creation and updation "
   txHash: Bytes!
+
+  " block number of creation and updation "
   block: BigInt!
+
+  " timestamp of creation "
   timestamp: BigInt!
+
+  " timestamp of creation and updation "
   updated: BigInt!
+
+  " NFT data "
+  nftContract: NFTContract! @derivedFrom(field: "creator")
+
+  " tokens minted "
+  nftTokens: CliptoToken! @derivedFrom(field: "creator")
 }
 
 type Request @entity {
+  " {creator's address} - {request id} "
   id: ID!
+
+  " request id represents the index of Request array "
   requestId: BigInt!
+
+  " creator address for whom the request is made "
   creator: Creator!
+
+  " user address who made the request "
   requester: Bytes!
+
+  " amount in ether unit amount * 10 ^ 18 "
   amount: BigInt!
+
+  " erc 20 token type used for the request "
+  token: Bytes!
+
+  " token id of the nft created for the request "
   tokenId: BigInt!
+
+  " token uri for the nft metadata "
   tokenUri: String!
+
+  " address of the nft contract of the creator  "
   tokenAddress: Bytes!
+
+  " status of the refund made for the request "
   refunded: Boolean!
+
+  " status for the completion of the request "
   delivered: Boolean!
+
+  " description/instruction for the request "
   description: String!
+
+  " deadline for the request, no of days after the creation "
   deadline: BigInt!
+
+  " hash of the transaction the request was created and updated "
   txHash: Bytes!
+
+  " block the request was made and updated "
   block: BigInt!
+
+  " timestamp of the request creation "
   timestamp: BigInt!
+
+  " timestamp of request creation and updation "
   updated: BigInt!
+}
+
+type NFTContract @entity {
+  " Contract address "
+  id: ID!
+
+  " token symbol "
+  symbol: String!
+
+  " token name "
+  name: String!
+
+  " total supply of tokens "
+  totalSupply: BigInt!
+
+  " Creator for whom this contract is assigned "
+  creator: Creator!
+
+  " all tokens under this contract "
+  cliptoTokens: [CliptoToken!]! @derivedFrom(field: "nftContract")
+
+  " all tokens under this contract "
+  events: [Transfer!]! @derivedFrom(field: "nftContract")
+
+  " created timestamp and bock, only updated on creation "
+  blockNumber: BigInt!
+  blockHash: Bytes!
+  txHash: Bytes!
+  timestamp: BigInt!
+}
+
+type CliptoToken @entity {
+  " { nft contract address } - { clipto token id }"
+  id: ID!
+
+  " token id "
+  tokenId: BigInt!
+
+  " nft contract address "
+  nftContract: NFTContract!
+
+  " original requester, first requester who received on mint "
+  originalRequester: Account!
+
+  " current owner of the token "
+  currentOwner: Account!
+
+  " who transfered this token "
+  from: Account!
+
+  " creator of the contract, one who minted "
+  creator: Creator!
+
+  " token metdata "
+  tokenUri: String!
+
+  " events under this token "
+  events: [Transfer!]! @derivedFrom(field: "cliptoToken")
+}
+
+type Transfer @entity {
+  " { contract address } - { hash }"
+  id: ID!
+
+  " from account "
+  from: Account!
+
+  " to account "
+  to: Account!
+
+  " token id for easier access "
+  tokenId: BigInt!
+
+  " nft transfered "
+  cliptoToken: CliptoToken!
+
+  " contract "
+  nftContract: NFTContract!
+
+  " type of event "
+  eventType: EventType!
+
+  " transaction details "
+  blockNumber: BigInt!
+  blockHash: Bytes!
+  txHash: Bytes!
+  timestamp: BigInt!
 }

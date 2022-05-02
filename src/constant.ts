@@ -1,5 +1,12 @@
 import { Address, BigDecimal, BigInt } from "@graphprotocol/graph-ts";
 
+// enums for graphql
+export namespace EventType {
+  export const MINT = "MINT";
+  export const BURN = "BURN";
+  export const TRANSFER = "TRANSFER";
+}
+
 export const NULL_ADDRESS = Address.fromString(
   "0x0000000000000000000000000000000000000000"
 );

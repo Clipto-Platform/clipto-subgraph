@@ -35,5 +35,5 @@ export function getArray(value: JSONValue | null): Array<string> {
 }
 
 export function readValue<T>(call: ethereum.CallResult<T>, defaultValue: T): T {
-  return call.reverted ? defaultValue : call.value ;
+  return call.reverted ? defaultValue : call.value;
 }
