@@ -2,6 +2,7 @@ specVersion: 0.0.2
 schema:
   file: ./schema.graphql
 dataSources:
+{{ #v0 }}
   - kind: ethereum
     name: CliptoExchange
     network: {{ chain }}
@@ -38,6 +39,9 @@ dataSources:
         - event: RequestUpdated(indexed address,indexed address,uint256,uint256)
           handler: handleRequestUpdated
       file: ./src/mappings/v0/exchange.ts
+  {{ /v0 }}
+
+  {{ #v1 }}
   - kind: ethereum
     name: CliptoExchangeV1
     network: {{ chain }}
@@ -74,6 +78,7 @@ dataSources:
         - event: RefundedRequest(indexed address,uint256)
           handler: handleRefundedRequest
       file: ./src/mappings/v1/exchange.ts
+  {{ /v1 }}
 
 
 templates:

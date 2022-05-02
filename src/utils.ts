@@ -1,9 +1,11 @@
 import {
   BigDecimal,
   BigInt,
+  Bytes,
   ethereum,
+  ipfs,
   JSONValue,
-  JSONValueKind
+  JSONValueKind,
 } from "@graphprotocol/graph-ts";
 
 export function getString(value: JSONValue | null): string {
@@ -31,17 +33,17 @@ export function getDecimal(value: JSONValue | null): BigDecimal {
 
 export function getArray(value: JSONValue | null): Array<string> {
   if (!value) return new Array<string>();
-  return value.toArray().map<string>(v => getString(v));
+  return value.toArray().map<string>((v) => getString(v));
 }
 
 export function readValue<T>(call: ethereum.CallResult<T>, defaultValue: T): T {
   return call.reverted ? defaultValue : call.value;
 }
 
-export function getJsonFromIpfs(metadataURI: string): string | null {
+export function getJsonFromIpfs(metadataURI: string): Bytes | null {
   if (metadataURI.length == 0) {
-    return "";
+    return null;
   }
   const hash = metadataURI.split("//");
-  return hash[1];
+  return ipfs.cat(hash[1]);
 }

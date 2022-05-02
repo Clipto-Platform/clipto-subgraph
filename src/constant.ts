@@ -11,6 +11,7 @@ export namespace Version {
   export const v0 = "v0";
   export const v1 = "v1";
 }
+
 export const NULL_ADDRESS = Address.fromString(
   "0x0000000000000000000000000000000000000000"
 );

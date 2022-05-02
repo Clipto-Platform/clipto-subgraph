@@ -1,28 +1,36 @@
-import { Address, json } from "@graphprotocol/graph-ts";
+import { json, log } from "@graphprotocol/graph-ts";
+import { ERC721 } from "../../../generated/CliptoExchange/ERC721";
 import {
+  CliptoExchangeV1,
   CreatorRegistered,
   CreatorUpdated,
   DeliveredRequest,
   NewRequest,
   RefundedRequest,
-  CliptoExchangeV1
 } from "../../../generated/CliptoExchangeV1/CliptoExchangeV1";
-import { ERC721 } from "../../../generated/CliptoExchange/ERC721";
 import { NFTContract } from "../../../generated/schema";
 import { CliptoToken as CliptoTokenTemplate } from "../../../generated/templates";
-import { getOrCreateCreator } from "../../entities/creator";
+import { Version } from "../../constant";
+import {
+  CreatorStruct,
+  DefaultCreatorStruct,
+  getOrCreateCreator,
+} from "../../entities/creator";
 import { getOrCreatePlatform } from "../../entities/platform";
-import { getOrCreateRequest } from "../../entities/request";
+import {
+  DefaultRequestStruct,
+  getOrCreateRequest,
+  RequestStruct,
+} from "../../entities/request";
 import { getOrCreateNFTContract } from "../../entities/token";
 import {
   getArray,
   getDecimal,
   getInt,
+  getJsonFromIpfs,
   getString,
   readValue,
-  getJsonFromIpfs
 } from "../../utils";
-import { BIGINT_ZERO, NULL_ADDRESS, Version } from "../../constant";
 
 export function handleCreatorRegistered(event: CreatorRegistered): void {
   getOrCreatePlatform(Version.v1);
@@ -30,34 +38,34 @@ export function handleCreatorRegistered(event: CreatorRegistered): void {
   let creator = getOrCreateCreator(event.params.creator);
   let CliptoExchange = CliptoExchangeV1.bind(event.address);
 
-  let try_creator = CliptoExchange.try_getCreator(event.params.creator);
-  let metadataURI, nft;
-  if (!try_creator.reverted) {
-    metadataURI = try_creator.value.metadataURI;
-    nft = try_creator.value.nft;
-  } else {
-    metadataURI = "";
-    nft = NULL_ADDRESS;
-  }
+  let try_creator = readValue<CreatorStruct>(
+    CliptoExchange.try_getCreator(event.params.creator),
+    new DefaultCreatorStruct()
+  );
 
+  creator.metadataURI = try_creator.metadataURI;
   creator.nftTokenAddress = event.params.nft;
   creator.address = event.params.creator;
   creator.txHash = event.transaction.hash;
   creator.block = event.block.number;
   creator.timestamp = event.block.timestamp;
 
-  const data = getJsonFromIpfs(metadataURI) as string;
-  let checkData = json.try_fromString(data);
-  if (checkData.isOk) {
-    let data = checkData.value.toObject();
+  const data = getJsonFromIpfs(try_creator.metadataURI);
+  if (data == null) {
+    log.warning("[IPFS] ipfs cat failed {}", [try_creator.metadataURI]);
+  } else {
+    let checkData = json.try_fromBytes(data);
+    if (checkData.isOk) {
+      let data = checkData.value.toObject();
 
-    creator.twitterHandle = getString(data.get("twitterHandle"));
-    creator.bio = getString(data.get("bio"));
-    creator.deliveryTime = getInt(data.get("deliveryTime"));
-    creator.profilePicture = getString(data.get("profilePicture"));
-    creator.userName = getString(data.get("userName"));
-    creator.price = getDecimal(data.get("price"));
-    creator.demos = getArray(data.get("demos"));
+      creator.twitterHandle = getString(data.get("twitterHandle"));
+      creator.bio = getString(data.get("bio"));
+      creator.deliveryTime = getInt(data.get("deliveryTime"));
+      creator.profilePicture = getString(data.get("profilePicture"));
+      creator.userName = getString(data.get("userName"));
+      creator.price = getDecimal(data.get("price"));
+      creator.demos = getArray(data.get("demos"));
+    }
   }
 
   creator.save();
@@ -73,72 +81,70 @@ export function handleCreatorRegistered(event: CreatorRegistered): void {
 export function handleCreatorUpdated(event: CreatorUpdated): void {
   let creator = getOrCreateCreator(event.params.creator);
 
+  let metadataURI = event.params.metadataURI;
+
   creator.address = event.params.creator;
+  creator.metadataURI = metadataURI;
 
-  const data = getJsonFromIpfs(event.params.metadataURI) as string;
+  const data = getJsonFromIpfs(metadataURI);
+  if (data == null) {
+    log.warning("[IPFS] ipfs cat failed {}", [metadataURI]);
+  } else {
+    let checkData = json.try_fromBytes(data);
+    if (checkData.isOk) {
+      let data = checkData.value.toObject();
 
-  let checkData = json.try_fromString(data);
-  if (checkData.isOk) {
-    let data = checkData.value.toObject();
-
-    creator.twitterHandle = getString(data.get("twitterHandle"));
-    creator.bio = getString(data.get("bio"));
-    creator.deliveryTime = getInt(data.get("deliveryTime"));
-    creator.profilePicture = getString(data.get("profilePicture"));
-    creator.userName = getString(data.get("userName"));
-    creator.price = getDecimal(data.get("price"));
-    creator.demos = getArray(data.get("demos"));
-    creator.updated = event.block.timestamp;
+      creator.twitterHandle = getString(data.get("twitterHandle"));
+      creator.bio = getString(data.get("bio"));
+      creator.deliveryTime = getInt(data.get("deliveryTime"));
+      creator.profilePicture = getString(data.get("profilePicture"));
+      creator.userName = getString(data.get("userName"));
+      creator.price = getDecimal(data.get("price"));
+      creator.demos = getArray(data.get("demos"));
+      creator.updated = event.block.timestamp;
+    }
   }
 
   creator.save();
 }
 
 export function handleNewRequest(event: NewRequest): void {
+  let creator = getOrCreateCreator(event.params.creator);
   let request = getOrCreateRequest(
     event.params.creator,
     event.params.requestId.toString(),
     Version.v1
   );
 
-  let creator = getOrCreateCreator(event.params.creator);
+  let CliptoExchange = CliptoExchangeV1.bind(event.address);
+  let try_request = readValue<RequestStruct>(
+    CliptoExchange.try_getRequest(event.params.creator, event.params.requestId),
+    new DefaultRequestStruct()
+  );
 
   request.creator = creator.id;
   request.nftTokenAddress = creator.nftTokenAddress;
-
-  let CliptoExchange = CliptoExchangeV1.bind(event.address);
-
-  let try_request = CliptoExchange.try_getRequest(
-    event.params.creator,
-    event.params.requestId
-  );
-  let requester, amount, metadataURI;
-  if (!try_request.reverted) {
-    requester = try_request.value.requester;
-    amount = try_request.value.amount;
-    metadataURI = try_request.value.metadataURI;
-  } else {
-    requester = NULL_ADDRESS;
-    amount = BIGINT_ZERO;
-    metadataURI = "";
-  }
-
-  request.requester = requester;
+  request.metadataURI = try_request.metadataURI;
+  request.requester = try_request.requester;
   request.requestId = event.params.requestId;
-  request.amount = amount;
+  request.amount = try_request.amount;
   request.txHash = event.transaction.hash;
   request.block = event.block.number;
   request.createdTimestamp = event.block.timestamp;
   request.refunded = false;
   request.delivered = false;
 
-  const data = getJsonFromIpfs(metadataURI) as string;
-  let checkData = json.try_fromString(data);
-  if (checkData.isOk) {
-    let data = checkData.value.toObject();
+  const data = getJsonFromIpfs(try_request.metadataURI);
+  if (data == null) {
+    log.warning("[IPFS] ipfs cat failed {}", [try_request.metadataURI]);
+  } else {
+    let checkData = json.try_fromBytes(data);
+    if (checkData.isOk) {
+      let data = checkData.value.toObject();
 
-    request.description = getString(data.get("description"));
-    request.deadline = getInt(data.get("deadline"));
+      request.description = getString(data.get("description"));
+      request.deadline = getInt(data.get("deadline"));
+    }
   }
 
   request.save();
@@ -153,25 +159,15 @@ export function handleDeliveredRequest(event: DeliveredRequest): void {
   );
 
   let CliptoExchange = CliptoExchangeV1.bind(event.address);
-  let try_request = CliptoExchange.try_getRequest(
-    event.params.creator,
-    event.params.requestId
+  let try_request = readValue<RequestStruct>(
+    CliptoExchange.try_getRequest(event.params.creator, event.params.requestId),
+    new DefaultRequestStruct()
   );
-  let requester, amount, metadataURI;
-  if (!try_request.reverted) {
-    requester = try_request.value.requester;
-    amount = try_request.value.amount;
-    metadataURI = try_request.value.metadataURI;
-  } else {
-    requester = NULL_ADDRESS;
-    amount = BIGINT_ZERO;
-    metadataURI = "";
-  }
 
   request.creator = event.params.creator.toHex();
-  request.requester = requester;
+  request.requester = try_request.requester;
   request.requestId = event.params.requestId;
-  request.amount = amount;
+  request.amount = try_request.amount;
   request.nftTokenId = event.params.nftTokenId;
   request.nftTokenAddress = creator.nftTokenAddress;
   request.txHash = event.transaction.hash;
@@ -208,22 +204,18 @@ export function handleMigrationCreator(event: RefundedRequest): void {
   let creator = getOrCreateCreator(event.params.creator);
   let CliptoExchange = CliptoExchangeV1.bind(event.address);
 
-  let try_creator = CliptoExchange.try_getCreator(event.params.creator);
-  let metadataURI, nft;
-  if (!try_creator.reverted) {
-    nft = try_creator.value.nft;
-  } else {
-    nft = NULL_ADDRESS;
-  }
+  let try_creator = readValue<CreatorStruct>(
+    CliptoExchange.try_getCreator(event.params.creator),
+    new DefaultCreatorStruct()
+  );
 
-  creator.nftTokenAddress = nft;
-
+  creator.nftTokenAddress = try_creator.nft;
   creator.save();
 
-  let nftContract = NFTContract.load(nft.toHex());
+  let nftContract = NFTContract.load(try_creator.nft.toHex());
   if (nftContract == null) {
     // starting sync of clipto token
-    CliptoTokenTemplate.create(nft);
-    getOrCreateNFTContract(nft, event);
+    CliptoTokenTemplate.create(try_creator.nft);
+    getOrCreateNFTContract(try_creator.nft, event);
   }
 }
