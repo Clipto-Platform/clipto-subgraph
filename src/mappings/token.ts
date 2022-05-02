@@ -1,14 +1,14 @@
 import { Address } from "@graphprotocol/graph-ts";
 import {
   ERC721,
-  Transfer as TransferEvent,
+  Transfer as TransferEvent
 } from "../../generated/CliptoExchange/ERC721";
 import { EventType, NULL_ADDRESS } from "../constant";
 import { createAccount } from "../entities/account";
 import { getOrCreateTransferEvent } from "../entities/event";
 import {
   getOrCreateCliptoToken,
-  getOrCreateNFTContract,
+  getOrCreateNFTContract
 } from "../entities/token";
 import { readValue } from "../utils";
 

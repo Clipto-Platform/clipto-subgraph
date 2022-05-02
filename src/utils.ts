@@ -3,7 +3,7 @@ import {
   BigInt,
   ethereum,
   JSONValue,
-  JSONValueKind,
+  JSONValueKind
 } from "@graphprotocol/graph-ts";
 
 export function getString(value: JSONValue | null): string {
@@ -31,9 +31,17 @@ export function getDecimal(value: JSONValue | null): BigDecimal {
 
 export function getArray(value: JSONValue | null): Array<string> {
   if (!value) return new Array<string>();
-  return value.toArray().map<string>((v) => getString(v));
+  return value.toArray().map<string>(v => getString(v));
 }
 
 export function readValue<T>(call: ethereum.CallResult<T>, defaultValue: T): T {
   return call.reverted ? defaultValue : call.value;
+}
+
+export function getJsonFromIpfs(metadataURI: string): string | null {
+  if (metadataURI.length == 0) {
+    return "";
+  }
+  const hash = metadataURI.split("//");
+  return hash[1];
 }

@@ -12,7 +12,8 @@ export function getOrCreateCreator(id: Address): Creator {
   creator = new Creator(id.toHex());
 
   creator.address = id;
-  creator.tokenAddress = NULL_ADDRESS;
+  creator.nftTokenAddress = NULL_ADDRESS;
+  creator.metadataURI = "";
   creator.twitterHandle = "";
   creator.bio = "";
   creator.deliveryTime = BIGINT_ZERO;

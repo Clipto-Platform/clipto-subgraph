@@ -5,16 +5,22 @@ import {
   DeliveredRequest,
   NewRequest,
   RefundedRequest,
-  RequestUpdated,
-} from "../../generated/CliptoExchange/CliptoExchange";
-import { ERC721 } from "../../generated/CliptoExchange/ERC721";
-import { NFTContract } from "../../generated/schema";
-import { CliptoToken as CliptoTokenTemplate } from "../../generated/templates";
-import { getOrCreateCreator } from "../entities/creator";
-import { getOrCreatePlatform } from "../entities/platform";
-import { getOrCreateRequest } from "../entities/request";
-import { getOrCreateNFTContract } from "../entities/token";
-import { getArray, getDecimal, getInt, getString, readValue } from "../utils";
+  RequestUpdated
+} from "../../../generated/CliptoExchange/CliptoExchange";
+import { ERC721 } from "../../../generated/CliptoExchange/ERC721";
+import { NFTContract } from "../../../generated/schema";
+import { CliptoToken as CliptoTokenTemplate } from "../../../generated/templates";
+import { getOrCreateCreator } from "../../entities/creator";
+import { getOrCreatePlatform } from "../../entities/platform";
+import { getOrCreateRequest } from "../../entities/request";
+import { getOrCreateNFTContract } from "../../entities/token";
+import {
+  getArray,
+  getDecimal,
+  getInt,
+  getString,
+  readValue
+} from "../../utils";
 
 export function handleCreatorRegistered(event: CreatorRegistered): void {
   getOrCreatePlatform();
@@ -54,7 +60,6 @@ export function handleCreatorUpdated(event: CreatorUpdated): void {
   let creator = getOrCreateCreator(event.params.creator);
 
   creator.address = event.params.creator;
-
   let checkData = json.try_fromString(event.params.data);
   if (checkData.isOk) {
     let data = checkData.value.toObject();
