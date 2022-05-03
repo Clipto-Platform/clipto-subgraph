@@ -1,7 +1,9 @@
 import {
   BigDecimal,
   BigInt,
+  Bytes,
   ethereum,
+  ipfs,
   JSONValue,
   JSONValueKind,
 } from "@graphprotocol/graph-ts";
@@ -36,4 +38,12 @@ export function getArray(value: JSONValue | null): Array<string> {
 
 export function readValue<T>(call: ethereum.CallResult<T>, defaultValue: T): T {
   return call.reverted ? defaultValue : call.value;
+}
+
+export function getJsonFromIpfs(metadataURI: string): Bytes | null {
+  if (metadataURI.length == 0) {
+    return null;
+  }
+  const hash = metadataURI.split("//");
+  return ipfs.cat(hash[1]);
 }

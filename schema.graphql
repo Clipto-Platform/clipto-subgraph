@@ -11,6 +11,7 @@ type Platform @entity {
   " contract details "
   name: String!
   network: String!
+  version: String!
 }
 
 type Account @entity {
@@ -24,11 +25,14 @@ type Creator @entity {
   " address of the creator "
   id: ID!
 
+  "MetaData uri"
+  metadataURI: String!
+  
   " address of the creator "
   address: Bytes!
 
   " nft contract address for the creator "
-  tokenAddress: Bytes!
+  nftTokenAddress: Bytes!
 
   " twitter handle of the creator "
   twitterHandle: String!
@@ -74,6 +78,12 @@ type Request @entity {
   " {creator's address} - {request id} "
   id: ID!
 
+  " request version- 0-> old contract, 1-> multi token, Nft contract update "
+  version: String!
+
+  "MetaData uri"
+  metadataURI: String!
+
   " request id represents the index of Request array "
   requestId: BigInt!
 
@@ -83,20 +93,23 @@ type Request @entity {
   " user address who made the request "
   requester: Bytes!
 
+  "nft token receiver"
+  nftReceiver: Bytes!
+
   " amount in ether unit amount * 10 ^ 18 "
   amount: BigInt!
 
   " erc 20 token type used for the request "
-  token: Bytes!
+  erc20: Bytes!
 
   " token id of the nft created for the request "
-  tokenId: BigInt!
+  nftTokenId: BigInt!
 
   " token uri for the nft metadata "
-  tokenUri: String!
+  nftTokenUri: String!
 
   " address of the nft contract of the creator  "
-  tokenAddress: Bytes!
+  nftTokenAddress: Bytes!
 
   " status of the refund made for the request "
   refunded: Boolean!
@@ -117,10 +130,10 @@ type Request @entity {
   block: BigInt!
 
   " timestamp of the request creation "
-  timestamp: BigInt!
+  createdTimestamp: BigInt!
 
   " timestamp of request creation and updation "
-  updated: BigInt!
+  updatedTimestamp: BigInt!
 }
 
 type NFTContract @entity {

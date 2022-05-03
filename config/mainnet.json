@@ -1,5 +1,11 @@
 {
   "chain": "matic",
-  "startBlock": "25833562",
-  "address": "0x36A9F25B8AA6b941B0c8177684E8ecff59376D9a"
+  "v0": {
+    "startBlock": "25833562",
+    "address": "0x36A9F25B8AA6b941B0c8177684E8ecff59376D9a"
+  },
+  "v1": {
+    "startBlock": "00000000",
+    "address": "0x0000000000000000000000000000000000000000"
+  }
 }

@@ -6,22 +6,29 @@ import {
   NewRequest,
   RefundedRequest,
   RequestUpdated,
-} from "../../generated/CliptoExchange/CliptoExchange";
-import { ERC721 } from "../../generated/CliptoExchange/ERC721";
-import { NFTContract } from "../../generated/schema";
-import { CliptoToken as CliptoTokenTemplate } from "../../generated/templates";
-import { getOrCreateCreator } from "../entities/creator";
-import { getOrCreatePlatform } from "../entities/platform";
-import { getOrCreateRequest } from "../entities/request";
-import { getOrCreateNFTContract } from "../entities/token";
-import { getArray, getDecimal, getInt, getString, readValue } from "../utils";
+} from "../../../generated/CliptoExchange/CliptoExchange";
+import { ERC721 } from "../../../generated/CliptoExchange/ERC721";
+import { NFTContract } from "../../../generated/schema";
+import { CliptoToken as CliptoTokenTemplate } from "../../../generated/templates";
+import { Version } from "../../constant";
+import { getOrCreateCreator } from "../../entities/creator";
+import { getOrCreatePlatform } from "../../entities/platform";
+import { getOrCreateRequest } from "../../entities/request";
+import { getOrCreateNFTContract } from "../../entities/token";
+import {
+  getArray,
+  getDecimal,
+  getInt,
+  getString,
+  readValue,
+} from "../../utils";
 
 export function handleCreatorRegistered(event: CreatorRegistered): void {
-  getOrCreatePlatform();
+  getOrCreatePlatform(Version.v0);
 
   let creator = getOrCreateCreator(event.params.creator);
 
-  creator.tokenAddress = event.params.token;
+  creator.nftTokenAddress = event.params.token;
   creator.address = event.params.creator;
   creator.txHash = event.transaction.hash;
   creator.block = event.block.number;
@@ -54,7 +61,6 @@ export function handleCreatorUpdated(event: CreatorUpdated): void {
   let creator = getOrCreateCreator(event.params.creator);
 
   creator.address = event.params.creator;
-
   let checkData = json.try_fromString(event.params.data);
   if (checkData.isOk) {
     let data = checkData.value.toObject();
@@ -73,19 +79,21 @@ export function handleCreatorUpdated(event: CreatorUpdated): void {
 }
 
 export function handleNewRequest(event: NewRequest): void {
-  let id = event.params.creator.toHex() + "-" + event.params.index.toHex();
-  let request = getOrCreateRequest(id);
-
   let creator = getOrCreateCreator(event.params.creator);
+  let request = getOrCreateRequest(
+    event.params.creator,
+    event.params.index.toString(),
+    Version.v0
+  );
 
   request.creator = creator.id;
-  request.tokenAddress = creator.tokenAddress;
+  request.nftTokenAddress = creator.nftTokenAddress;
   request.requester = event.params.requester;
   request.requestId = event.params.index;
   request.amount = event.params.amount;
   request.txHash = event.transaction.hash;
   request.block = event.block.number;
-  request.timestamp = event.block.timestamp;
+  request.createdTimestamp = event.block.timestamp;
   request.refunded = false;
   request.delivered = false;
 
@@ -101,22 +109,25 @@ export function handleNewRequest(event: NewRequest): void {
 }
 
 export function handleDeliveredRequest(event: DeliveredRequest): void {
-  let id = event.params.creator.toHex() + "-" + event.params.index.toHex();
-  let request = getOrCreateRequest(id);
+  let request = getOrCreateRequest(
+    event.params.creator,
+    event.params.index.toString(),
+    Version.v0
+  );
 
   request.creator = event.params.creator.toHex();
   request.requester = event.params.requester;
   request.requestId = event.params.index;
   request.amount = event.params.amount;
-  request.tokenId = event.params.tokenId;
-  request.tokenAddress = event.params.tokenAddress;
+  request.nftTokenId = event.params.tokenId;
+  request.nftTokenAddress = event.params.tokenAddress;
   request.txHash = event.transaction.hash;
   request.block = event.block.number;
-  request.updated = event.block.timestamp;
+  request.updatedTimestamp = event.block.timestamp;
   request.delivered = true;
 
   let erc721Contract = ERC721.bind(event.params.tokenAddress);
-  request.tokenUri = readValue<string>(
+  request.nftTokenUri = readValue<string>(
     erc721Contract.try_tokenURI(event.params.tokenId),
     ""
   );
@@ -125,23 +136,29 @@ export function handleDeliveredRequest(event: DeliveredRequest): void {
 }
 
 export function handleRefundedRequest(event: RefundedRequest): void {
-  let id = event.params.creator.toHex() + "-" + event.params.index.toHex();
-  let request = getOrCreateRequest(id);
+  let request = getOrCreateRequest(
+    event.params.creator,
+    event.params.index.toString(),
+    Version.v0
+  );
 
   request.txHash = event.transaction.hash;
   request.block = event.block.number;
-  request.updated = event.block.timestamp;
+  request.updatedTimestamp = event.block.timestamp;
   request.refunded = true;
   request.save();
 }
 
 export function handleRequestUpdated(event: RequestUpdated): void {
-  let id = event.params.creator.toHex() + "-" + event.params.index.toHex();
-  let request = getOrCreateRequest(id);
+  let request = getOrCreateRequest(
+    event.params.creator,
+    event.params.index.toString(),
+    Version.v0
+  );
 
   request.amount = event.params.amountIncreased;
   request.txHash = event.transaction.hash;
   request.block = event.block.number;
-  request.updated = event.block.timestamp;
+  request.updatedTimestamp = event.block.timestamp;
   request.save();
 }

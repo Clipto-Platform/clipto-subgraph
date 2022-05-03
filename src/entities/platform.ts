@@ -1,7 +1,7 @@
 import { dataSource } from "@graphprotocol/graph-ts";
 import { Platform } from "../../generated/schema";
 
-export function getOrCreatePlatform(): Platform {
+export function getOrCreatePlatform(version: string): Platform {
   let platform = Platform.load(dataSource.address.toString());
 
   if (platform) {
@@ -12,6 +12,7 @@ export function getOrCreatePlatform(): Platform {
 
   platform.name = "Clipto Exchange";
   platform.network = dataSource.network.toString();
+  platform.version = version;
   platform.save();
 
   return platform;
