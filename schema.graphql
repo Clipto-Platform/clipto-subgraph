@@ -30,7 +30,7 @@ type Creator @entity {
   " address of the creator "
   id: ID!
 
-  " metaData uri "
+  " metadata uri "
   metadataURI: String!
   
   " address of the creator "
@@ -89,7 +89,7 @@ type Request @entity {
   " request version- 0-> old contract, 1-> multi token, Nft contract update "
   version: String!
 
-  " metaData uri "
+  " metadata uri "
   metadataURI: String!
 
   " request id represents the index of Request array "
