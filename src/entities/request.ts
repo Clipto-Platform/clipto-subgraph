@@ -1,4 +1,4 @@
-import { Address, BigInt, ethereum } from "@graphprotocol/graph-ts";
+import { Address, BigInt } from "@graphprotocol/graph-ts";
 import { Request } from "../../generated/schema";
 import { BIGINT_ZERO, NULL_ADDRESS } from "../constant";
 
@@ -41,54 +41,27 @@ export function getOrCreateRequest(
   return request;
 }
 
-export class RequestStruct extends ethereum.Tuple {
-  get requester(): Address {
-    return this[0].toAddress();
-  }
+export class RequestStruct {
+  requester: Address;
+  nftReceiver: Address;
+  erc20: Address;
+  fulfilled: bool;
+  metadataURI: string;
+  amount: BigInt;
 
-  get nftReceiver(): Address {
-    return this[1].toAddress();
-  }
-
-  get erc20(): Address {
-    return this[2].toAddress();
-  }
-
-  get amount(): BigInt {
-    return this[3].toBigInt();
-  }
-
-  get fulfilled(): boolean {
-    return this[4].toBoolean();
-  }
-
-  get metadataURI(): string {
-    return this[5].toString();
-  }
-}
-
-export class DefaultRequestStruct extends ethereum.Tuple {
-  get requester(): Address {
-    return NULL_ADDRESS;
-  }
-
-  get nftReceiver(): Address {
-    return NULL_ADDRESS;
-  }
-
-  get erc20(): Address {
-    return NULL_ADDRESS;
-  }
-
-  get amount(): BigInt {
-    return BIGINT_ZERO;
-  }
-
-  get fulfilled(): boolean {
-    return false;
-  }
-
-  get metadataURI(): string {
-    return "";
+  constructor(
+    requester: Address,
+    nftReceiver: Address,
+    erc20: Address,
+    amount: BigInt,
+    fulfilled: bool,
+    metdataURI: string
+  ) {
+    this.requester = requester;
+    this.nftReceiver = nftReceiver;
+    this.erc20 = erc20;
+    this.amount = amount;
+    this.fulfilled = fulfilled;
+    this.metadataURI = metdataURI;
   }
 }

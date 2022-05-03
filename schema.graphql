@@ -12,6 +12,11 @@ type Platform @entity {
   name: String!
   network: String!
   version: String!
+
+  " metrics "
+  totalUsers: Int!
+  totalCreators: Int!
+  totalRequests: Int!
 }
 
 type Account @entity {
@@ -25,7 +30,7 @@ type Creator @entity {
   " address of the creator "
   id: ID!
 
-  "MetaData uri"
+  " metadata uri "
   metadataURI: String!
   
   " address of the creator "
@@ -72,16 +77,19 @@ type Creator @entity {
 
   " tokens minted "
   nftTokens: CliptoToken! @derivedFrom(field: "creator")
+
+  " all requests of creator "
+  requests: [Request!]! @derivedFrom(field: "creator")
 }
 
 type Request @entity {
-  " {creator's address} - {request id} "
+  " {creator's address} - {version} - {request id} "
   id: ID!
 
   " request version- 0-> old contract, 1-> multi token, Nft contract update "
   version: String!
 
-  "MetaData uri"
+  " metadata uri "
   metadataURI: String!
 
   " request id represents the index of Request array "

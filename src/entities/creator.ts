@@ -1,6 +1,12 @@
-import { Address, ethereum } from "@graphprotocol/graph-ts";
+import { Address } from "@graphprotocol/graph-ts";
 import { Creator } from "../../generated/schema";
-import { BIGDECIMAL_ZERO, BIGINT_ZERO, NULL_ADDRESS } from "../constant";
+import {
+  BIGDECIMAL_ZERO,
+  BIGINT_ZERO,
+  NULL_ADDRESS,
+  Version,
+} from "../constant";
+import { getOrCreatePlatform } from "./platform";
 
 export function getOrCreateCreator(id: Address): Creator {
   let creator = Creator.load(id.toHex());
@@ -27,25 +33,19 @@ export function getOrCreateCreator(id: Address): Creator {
   creator.updated = BIGINT_ZERO;
   creator.save();
 
+  let platform = getOrCreatePlatform(Version.v1);
+
+  platform.totalCreators = platform.totalCreators + 1;
+  platform.save();
+
   return creator;
 }
 
-export class CreatorStruct extends ethereum.Tuple {
-  get nft(): Address {
-    return this[0].toAddress();
-  }
+export class CreatorStruct {
+  nft: Address;
+  metadataURI: string;
 
-  get metadataURI(): string {
-    return this[1].toString();
-  }
-}
-
-export class DefaultCreatorStruct extends ethereum.Tuple {
-  get nft(): Address {
-    return NULL_ADDRESS;
-  }
-
-  get metadataURI(): string {
-    return "";
+  constructor(nft: Address, metadataURI: string) {
+    (this.nft = nft), (this.metadataURI = metadataURI);
   }
 }
