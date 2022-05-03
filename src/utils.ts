@@ -6,7 +6,15 @@ import {
   ipfs,
   JSONValue,
   JSONValueKind,
+  log
 } from "@graphprotocol/graph-ts";
+import {
+  CliptoExchangeV1__getCreatorResultValue0Struct,
+  CliptoExchangeV1__getRequestResultValue0Struct
+} from "../generated/CliptoExchangeV1/CliptoExchangeV1";
+import { BIGINT_ZERO, NULL_ADDRESS } from "./constant";
+import { CreatorStruct } from "./entities/creator";
+import { RequestStruct } from "./entities/request";
 
 export function getString(value: JSONValue | null): string {
   if (!value) return "";
@@ -33,17 +41,53 @@ export function getDecimal(value: JSONValue | null): BigDecimal {
 
 export function getArray(value: JSONValue | null): Array<string> {
   if (!value) return new Array<string>();
-  return value.toArray().map<string>((v) => getString(v));
+  return value.toArray().map<string>(v => getString(v));
 }
 
 export function readValue<T>(call: ethereum.CallResult<T>, defaultValue: T): T {
   return call.reverted ? defaultValue : call.value;
 }
 
-export function getJsonFromIpfs(metadataURI: string): Bytes | null {
-  if (metadataURI.length == 0) {
-    return null;
+export function readValueFromCreatorStruct(
+  call: ethereum.CallResult<CliptoExchangeV1__getCreatorResultValue0Struct>
+): CreatorStruct {
+  if (call.reverted) {
+    return new CreatorStruct(NULL_ADDRESS, "");
   }
+  return new CreatorStruct(call.value.nft, call.value.metadataURI);
+}
+
+export function readValueFromRequestStruct(
+  call: ethereum.CallResult<CliptoExchangeV1__getRequestResultValue0Struct>
+): RequestStruct {
+  if (call.reverted) {
+    return new RequestStruct(
+      NULL_ADDRESS,
+      NULL_ADDRESS,
+      NULL_ADDRESS,
+      BIGINT_ZERO,
+      false,
+      ""
+    );
+  }
+
+  return new RequestStruct(
+    call.value.requester,
+    call.value.nftReceiver,
+    call.value.erc20,
+    call.value.amount,
+    call.value.fulfilled,
+    call.value.metadataURI
+  );
+}
+
+export function getJsonFromIpfs(metadataURI: string): Bytes {
   const hash = metadataURI.split("//");
-  return ipfs.cat(hash[1]);
+  const result = ipfs.cat(hash[1]);
+  if (!result) {
+    log.warning("[IPFS] ipfs cat failed {}", [metadataURI]);
+    return Bytes.empty();
+  }
+
+  return result;
 }

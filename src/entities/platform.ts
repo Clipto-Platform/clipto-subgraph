@@ -13,6 +13,9 @@ export function getOrCreatePlatform(version: string): Platform {
   platform.name = "Clipto Exchange";
   platform.network = dataSource.network.toString();
   platform.version = version;
+  platform.totalUsers = 0;
+  platform.totalCreators = 0;
+  platform.totalRequests = 0;
   platform.save();
 
   return platform;
