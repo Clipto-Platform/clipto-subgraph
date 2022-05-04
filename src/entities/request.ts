@@ -9,7 +9,9 @@ export function getOrCreateRequest(
 ): Request {
   let id = creator
     .toHex()
+    .concat("-")
     .concat(version)
+    .concat("-")
     .concat(requestId);
   let request = Request.load(id);
 
@@ -19,6 +21,7 @@ export function getOrCreateRequest(
 
   request = new Request(id);
 
+  request.creator = creator.toHex();
   request.requestId = BIGINT_ZERO;
   request.metadataURI = "";
   request.requester = NULL_ADDRESS;
@@ -30,6 +33,7 @@ export function getOrCreateRequest(
   request.nftTokenAddress = NULL_ADDRESS;
   request.refunded = false;
   request.delivered = false;
+  request.isBusiness = false;
   request.description = "";
   request.deadline = BIGINT_ZERO;
   request.txHash = NULL_ADDRESS;

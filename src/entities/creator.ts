@@ -1,8 +1,9 @@
 import { Address } from "@graphprotocol/graph-ts";
 import { Creator } from "../../generated/schema";
 import {
-  BIGDECIMAL_ZERO,
   BIGINT_ZERO,
+  DEFAULT_BUSINESS_PRICE,
+  DEFAULT_PRICE,
   NULL_ADDRESS,
   Version,
 } from "../constant";
@@ -26,7 +27,8 @@ export function getOrCreateCreator(id: Address): Creator {
   creator.demos = [];
   creator.profilePicture = "";
   creator.userName = "";
-  creator.price = BIGDECIMAL_ZERO;
+  creator.price = DEFAULT_PRICE;
+  creator.businessPrice = DEFAULT_BUSINESS_PRICE;
   creator.txHash = NULL_ADDRESS;
   creator.block = BIGINT_ZERO;
   creator.timestamp = BIGINT_ZERO;

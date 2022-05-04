@@ -60,6 +60,9 @@ type Creator @entity {
   " min price accepted for each request "
   price: BigDecimal!
 
+  " min price for business requests "
+  businessPrice: BigDecimal!
+
   " transaction hash of the creator creation and updation "
   txHash: Bytes!
 
@@ -73,10 +76,10 @@ type Creator @entity {
   updated: BigInt!
 
   " NFT data "
-  nftContract: NFTContract! @derivedFrom(field: "creator")
+  nftContract: [NFTContract!]! @derivedFrom(field: "creator")
 
   " tokens minted "
-  nftTokens: CliptoToken! @derivedFrom(field: "creator")
+  nftTokens: [CliptoToken!]! @derivedFrom(field: "creator")
 
   " all requests of creator "
   requests: [Request!]! @derivedFrom(field: "creator")
@@ -125,6 +128,9 @@ type Request @entity {
   " status for the completion of the request "
   delivered: Boolean!
 
+  " whether the request is related to business "
+  isBusiness: Boolean!
+
   " description/instruction for the request "
   description: String!
 
@@ -153,6 +159,9 @@ type NFTContract @entity {
 
   " token name "
   name: String!
+
+  " version of nft contract "
+  version: String!
 
   " total supply of tokens "
   totalSupply: BigInt!

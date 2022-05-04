@@ -8,13 +8,10 @@ import {
   RequestUpdated,
 } from "../../../generated/CliptoExchange/CliptoExchange";
 import { ERC721 } from "../../../generated/CliptoExchange/ERC721";
-import { NFTContract } from "../../../generated/schema";
-import { CliptoToken as CliptoTokenTemplate } from "../../../generated/templates";
 import { Version } from "../../constant";
 import { getOrCreateCreator } from "../../entities/creator";
 import { getOrCreatePlatform } from "../../entities/platform";
 import { getOrCreateRequest } from "../../entities/request";
-import { getOrCreateNFTContract } from "../../entities/token";
 import {
   getArray,
   getDecimal,
@@ -22,6 +19,7 @@ import {
   getString,
   readValue,
 } from "../../utils";
+import { beginNFTContractSync } from "../token";
 
 export function handleCreatorRegistered(event: CreatorRegistered): void {
   getOrCreatePlatform(Version.v0);
@@ -46,15 +44,9 @@ export function handleCreatorRegistered(event: CreatorRegistered): void {
     creator.price = getDecimal(data.get("price"));
     creator.demos = getArray(data.get("demos"));
   }
-
   creator.save();
 
-  let nftContract = NFTContract.load(event.params.token.toHex());
-  if (nftContract == null) {
-    // starting sync of clipto token
-    CliptoTokenTemplate.create(event.params.token);
-    getOrCreateNFTContract(event.params.token, event);
-  }
+  beginNFTContractSync(event.params.token, event, creator.id, Version.v0);
 }
 
 export function handleCreatorUpdated(event: CreatorUpdated): void {
@@ -89,6 +81,7 @@ export function handleNewRequest(event: NewRequest): void {
   request.creator = creator.id;
   request.nftTokenAddress = creator.nftTokenAddress;
   request.requester = event.params.requester;
+  request.nftReceiver = event.params.requester;
   request.requestId = event.params.index;
   request.amount = event.params.amount;
   request.txHash = event.transaction.hash;
