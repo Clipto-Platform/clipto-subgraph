@@ -46,8 +46,7 @@ function updateContract(contract: NFTContract, address: Address): void {
 
 export function getOrCreateCliptoToken(
   address: Address,
-  tokenId: BigInt,
-  event: ethereum.Event
+  tokenId: BigInt
 ): CliptoToken {
   let id = address
     .toHex()
@@ -62,7 +61,7 @@ export function getOrCreateCliptoToken(
   token = new CliptoToken(id);
 
   token.tokenId = tokenId;
-  token.nftContract = getOrCreateNFTContract(address, event).id;
+  token.nftContract = "";
   token.originalRequester = "";
   token.currentOwner = "";
   token.from = "";

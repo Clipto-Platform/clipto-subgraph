@@ -6,11 +6,11 @@ import {
   ipfs,
   JSONValue,
   JSONValueKind,
-  log
+  log,
 } from "@graphprotocol/graph-ts";
 import {
   CliptoExchangeV1__getCreatorResultValue0Struct,
-  CliptoExchangeV1__getRequestResultValue0Struct
+  CliptoExchangeV1__getRequestResultValue0Struct,
 } from "../generated/CliptoExchangeV1/CliptoExchangeV1";
 import { BIGINT_ZERO, NULL_ADDRESS } from "./constant";
 import { CreatorStruct } from "./entities/creator";
@@ -20,6 +20,15 @@ export function getString(value: JSONValue | null): string {
   if (!value) return "";
   if (value.kind == JSONValueKind.STRING) return value.toString();
   return value.data.toString();
+}
+
+export function getBoolean(value: JSONValue | null): boolean {
+  if (!value) return false;
+  if (value.kind == JSONValueKind.BOOL) return value.toBool();
+  if (value.kind == JSONValueKind.NUMBER) {
+    return value.toI64() == 0 ? false : true;
+  }
+  return BigInt.fromString(value.data.toString()) == BIGINT_ZERO ? false : true;
 }
 
 export function getInt(value: JSONValue | null): BigInt {
@@ -41,7 +50,7 @@ export function getDecimal(value: JSONValue | null): BigDecimal {
 
 export function getArray(value: JSONValue | null): Array<string> {
   if (!value) return new Array<string>();
-  return value.toArray().map<string>(v => getString(v));
+  return value.toArray().map<string>((v) => getString(v));
 }
 
 export function readValue<T>(call: ethereum.CallResult<T>, defaultValue: T): T {

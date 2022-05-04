@@ -5,18 +5,17 @@ import {
   CreatorRegistered,
   CreatorUpdated,
   DeliveredRequest,
+  MigrationCreator,
   NewRequest,
   RefundedRequest,
 } from "../../../generated/CliptoExchangeV1/CliptoExchangeV1";
-import { NFTContract } from "../../../generated/schema";
-import { CliptoToken as CliptoTokenTemplate } from "../../../generated/templates";
 import { Version } from "../../constant";
 import { getOrCreateCreator } from "../../entities/creator";
 import { getOrCreatePlatform } from "../../entities/platform";
 import { getOrCreateRequest } from "../../entities/request";
-import { getOrCreateNFTContract } from "../../entities/token";
 import {
   getArray,
+  getBoolean,
   getDecimal,
   getInt,
   getJsonFromIpfs,
@@ -25,6 +24,7 @@ import {
   readValueFromCreatorStruct,
   readValueFromRequestStruct,
 } from "../../utils";
+import { beginNFTContractSync } from "../token";
 
 export function handleCreatorRegistered(event: CreatorRegistered): void {
   getOrCreatePlatform(Version.v1);
@@ -54,17 +54,13 @@ export function handleCreatorRegistered(event: CreatorRegistered): void {
     creator.profilePicture = getString(data.get("profilePicture"));
     creator.userName = getString(data.get("userName"));
     creator.price = getDecimal(data.get("price"));
+    creator.businessPrice = getDecimal(data.get("businessPrice"));
     creator.demos = getArray(data.get("demos"));
   }
 
   creator.save();
 
-  let nftContract = NFTContract.load(event.params.nft.toHex());
-  if (nftContract == null) {
-    // starting sync of clipto token
-    CliptoTokenTemplate.create(event.params.nft);
-    getOrCreateNFTContract(event.params.nft, event);
-  }
+  beginNFTContractSync(event.params.nft, event, creator.id, Version.v1);
 }
 
 export function handleCreatorUpdated(event: CreatorUpdated): void {
@@ -85,6 +81,7 @@ export function handleCreatorUpdated(event: CreatorUpdated): void {
     creator.profilePicture = getString(data.get("profilePicture"));
     creator.userName = getString(data.get("userName"));
     creator.price = getDecimal(data.get("price"));
+    creator.businessPrice = getDecimal(data.get("businessPrice"));
     creator.demos = getArray(data.get("demos"));
     creator.updated = event.block.timestamp;
   }
@@ -105,23 +102,27 @@ export function handleNewRequest(event: NewRequest): void {
     exchange.try_getRequest(event.params.creator, event.params.requestId)
   );
 
-  request.creator = creator.id;
-  request.nftTokenAddress = creator.nftTokenAddress;
   request.metadataURI = try_request.metadataURI;
-  request.requester = try_request.requester;
   request.requestId = event.params.requestId;
+  request.creator = creator.id;
+  request.requester = try_request.requester;
+  request.nftReceiver = try_request.nftReceiver;
   request.amount = try_request.amount;
+  request.erc20 = try_request.erc20;
+  request.nftTokenAddress = creator.nftTokenAddress;
+  request.refunded = false;
+  request.delivered = false;
   request.txHash = event.transaction.hash;
   request.block = event.block.number;
   request.createdTimestamp = event.block.timestamp;
-  request.refunded = false;
-  request.delivered = false;
+  request.updatedTimestamp = event.block.timestamp;
 
   const data = getJsonFromIpfs(try_request.metadataURI);
   const checkData = json.try_fromBytes(data);
   if (checkData.isOk) {
     let data = checkData.value.toObject();
 
+    request.isBusiness = getBoolean(data.get("isBusiness"));
     request.description = getString(data.get("description"));
     request.deadline = getInt(data.get("deadline"));
   }
@@ -130,31 +131,20 @@ export function handleNewRequest(event: NewRequest): void {
 }
 
 export function handleDeliveredRequest(event: DeliveredRequest): void {
-  let creator = getOrCreateCreator(event.params.creator);
   let request = getOrCreateRequest(
     event.params.creator,
     event.params.requestId.toString(),
     Version.v1
   );
 
-  let exchange = CliptoExchangeV1.bind(event.address);
-  let try_request = readValueFromRequestStruct(
-    exchange.try_getRequest(event.params.creator, event.params.requestId)
-  );
-
-  request.creator = event.params.creator.toHex();
-  request.requester = try_request.requester;
-  request.requestId = event.params.requestId;
-  request.amount = try_request.amount;
+  request.delivered = true;
   request.nftTokenId = event.params.nftTokenId;
-  request.nftTokenAddress = creator.nftTokenAddress;
   request.txHash = event.transaction.hash;
   request.block = event.block.number;
   request.updatedTimestamp = event.block.timestamp;
-  request.delivered = true;
 
   let erc721Contract = ERC721.bind(
-    Address.fromString(creator.nftTokenAddress.toHex())
+    Address.fromString(request.nftTokenAddress.toHex())
   );
   request.nftTokenUri = readValue<string>(
     erc721Contract.try_tokenURI(event.params.nftTokenId),
@@ -178,23 +168,22 @@ export function handleRefundedRequest(event: RefundedRequest): void {
   request.save();
 }
 
-export function handleMigrationCreator(event: RefundedRequest): void {
+export function handleMigrationCreator(event: MigrationCreator): void {
   getOrCreatePlatform(Version.v1);
 
-  let creator = getOrCreateCreator(event.params.creator);
-  let exchange = CliptoExchangeV1.bind(event.address);
+  for (let index = 0; index < event.params.creators.length; index++) {
+    let creatorAddress = event.params.creators[index];
+    let creator = getOrCreateCreator(creatorAddress);
+    let exchange = CliptoExchangeV1.bind(event.address);
 
-  let try_creator = readValueFromCreatorStruct(
-    exchange.try_getCreator(event.params.creator)
-  );
+    let try_creator = readValueFromCreatorStruct(
+      exchange.try_getCreator(creatorAddress)
+    );
 
-  creator.nftTokenAddress = try_creator.nft;
-  creator.save();
+    creator.metadataURI = try_creator.metadataURI;
+    creator.nftTokenAddress = try_creator.nft;
+    creator.save();
 
-  let nftContract = NFTContract.load(try_creator.nft.toHex());
-  if (nftContract == null) {
-    // starting sync of clipto token
-    CliptoTokenTemplate.create(try_creator.nft);
-    getOrCreateNFTContract(try_creator.nft, event);
+    beginNFTContractSync(try_creator.nft, event, creator.id, Version.v1);
   }
 }

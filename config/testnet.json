@@ -2,10 +2,10 @@
   "chain": "mumbai",
   "v0": {
     "startBlock": "25457852",
-    "address": "0x515b631E814d3CB586e3e2cF486c0c814CC8A0Bb"
+    "address": "0x307736eCecF51104a841CfF44A2508775878fe3f"
   },
   "v1": {
-    "startBlock": "00000000",
-    "address": "0x0000000000000000000000000000000000000000"
+    "startBlock": "26183240",
+    "address": "0xA7d44425940D85F5fB37756Ab60B68BCA8B58732"
   }
 }
