@@ -48,6 +48,7 @@ export function handleCreatorRegistered(event: CreatorRegistered): void {
   if (checkData.isOk) {
     let data = checkData.value.toObject();
 
+    creator.cat = true;
     creator.twitterHandle = getString(data.get("twitterHandle"));
     creator.bio = getString(data.get("bio"));
     creator.deliveryTime = getInt(data.get("deliveryTime"));
@@ -191,6 +192,7 @@ export function handleMigrationCreator(event: MigrationCreator): void {
     const checkData = json.try_fromBytes(data as Bytes);
     if (checkData.isOk) {
       let data = checkData.value.toObject();
+
       creator.cat = true;
       creator.twitterHandle = getString(data.get("twitterHandle"));
       creator.bio = getString(data.get("bio"));
@@ -198,9 +200,10 @@ export function handleMigrationCreator(event: MigrationCreator): void {
       creator.profilePicture = getString(data.get("profilePicture"));
       creator.userName = getString(data.get("userName"));
       creator.price = getDecimal(data.get("price"));
-      // creator.businessPrice = getDecimal(data.get("businessPrice"));
+      creator.businessPrice = getDecimal(data.get("businessPrice"));
       creator.demos = getArray(data.get("demos"));
     }
+
     creator.save();
 
     beginNFTContractSync(try_creator.nft, event, creator.id, Version.v1);
