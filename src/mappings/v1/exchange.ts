@@ -182,6 +182,25 @@ export function handleMigrationCreator(event: MigrationCreator): void {
 
     creator.metadataURI = try_creator.metadataURI;
     creator.nftTokenAddress = try_creator.nft;
+    creator.address = creatorAddress;
+    creator.txHash = event.transaction.hash;
+    creator.block = event.block.number;
+    creator.timestamp = event.block.timestamp;
+
+    const data = getJsonFromIpfs(try_creator.metadataURI);
+    const checkData = json.try_fromBytes(data as Bytes);
+    if (checkData.isOk) {
+      let data = checkData.value.toObject();
+
+      creator.twitterHandle = getString(data.get("twitterHandle"));
+      creator.bio = getString(data.get("bio"));
+      creator.deliveryTime = getInt(data.get("deliveryTime"));
+      creator.profilePicture = getString(data.get("profilePicture"));
+      creator.userName = getString(data.get("userName"));
+      creator.price = getDecimal(data.get("price"));
+      creator.businessPrice = getDecimal(data.get("businessPrice"));
+      creator.demos = getArray(data.get("demos"));
+    }
     creator.save();
 
     beginNFTContractSync(try_creator.nft, event, creator.id, Version.v1);
