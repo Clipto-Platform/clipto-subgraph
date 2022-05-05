@@ -33,6 +33,7 @@ export function getOrCreateCreator(id: Address): Creator {
   creator.block = BIGINT_ZERO;
   creator.timestamp = BIGINT_ZERO;
   creator.updated = BIGINT_ZERO;
+  creator.cat= false;
   creator.save();
 
   let platform = getOrCreatePlatform(Version.v1);

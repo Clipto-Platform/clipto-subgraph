@@ -91,12 +91,13 @@ export function readValueFromRequestStruct(
 }
 
 export function getJsonFromIpfs(metadataURI: string): Bytes {
+  log.warning("metadataURI {}", [metadataURI]);
   const hash = metadataURI.split("//");
+  log.warning("hash {}{}", [metadataURI,hash[1]]);
   const result = ipfs.cat(hash[1]);
   if (!result) {
     log.warning("[IPFS] ipfs cat failed {}", [metadataURI]);
     return Bytes.empty();
   }
-
   return result;
 }

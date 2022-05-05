@@ -83,6 +83,9 @@ type Creator @entity {
 
   " all requests of creator "
   requests: [Request!]! @derivedFrom(field: "creator")
+
+  "cat ipfs"
+  cat: Boolean!
 }
 
 type Request @entity {
