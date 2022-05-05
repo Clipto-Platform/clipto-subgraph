@@ -21,6 +21,7 @@ export function getOrCreateRequest(
 
   request = new Request(id);
 
+  request.version = version;
   request.creator = creator.toHex();
   request.requestId = BIGINT_ZERO;
   request.metadataURI = "";
