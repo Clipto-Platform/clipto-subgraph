@@ -60,13 +60,11 @@ export class RequestStruct {
     erc20: Address,
     amount: BigInt,
     fulfilled: bool,
-    metdataURI: string
   ) {
     this.requester = requester;
     this.nftReceiver = nftReceiver;
     this.erc20 = erc20;
     this.amount = amount;
     this.fulfilled = fulfilled;
-    this.metadataURI = metdataURI;
   }
 }

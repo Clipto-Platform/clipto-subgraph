@@ -21,7 +21,6 @@ import {
   getJsonFromIpfs,
   getString,
   readValue,
-  readValueFromCreatorStruct,
   readValueFromRequestStruct,
 } from "../../utils";
 import { beginNFTContractSync } from "../token";
@@ -30,25 +29,16 @@ export function handleCreatorRegistered(event: CreatorRegistered): void {
   getOrCreatePlatform(Version.v1);
 
   let creator = getOrCreateCreator(event.params.creator);
-  let exchange = CliptoExchangeV1.bind(event.address);
-
-  let try_creator = readValueFromCreatorStruct(
-    exchange.try_getCreator(event.params.creator)
-  );
-
-  creator.metadataURI = try_creator.metadataURI;
   creator.nftTokenAddress = event.params.nft;
   creator.address = event.params.creator;
   creator.txHash = event.transaction.hash;
   creator.block = event.block.number;
   creator.timestamp = event.block.timestamp;
 
-  const data = getJsonFromIpfs(try_creator.metadataURI);
-  const checkData = json.try_fromBytes(data as Bytes);
+  let checkData = json.try_fromString(event.params.jsondata);
   if (checkData.isOk) {
     let data = checkData.value.toObject();
 
-    creator.cat = true;
     creator.twitterHandle = getString(data.get("twitterHandle"));
     creator.bio = getString(data.get("bio"));
     creator.deliveryTime = getInt(data.get("deliveryTime"));
@@ -66,13 +56,10 @@ export function handleCreatorRegistered(event: CreatorRegistered): void {
 
 export function handleCreatorUpdated(event: CreatorUpdated): void {
   let creator = getOrCreateCreator(event.params.creator);
-  let metadataURI = event.params.metadataURI;
 
   creator.address = event.params.creator;
-  creator.metadataURI = metadataURI;
 
-  const data = getJsonFromIpfs(metadataURI);
-  const checkData = json.try_fromBytes(data);
+  let checkData = json.try_fromString(event.params.jsondata);
   if (checkData.isOk) {
     let data = checkData.value.toObject();
 
@@ -103,7 +90,6 @@ export function handleNewRequest(event: NewRequest): void {
     exchange.try_getRequest(event.params.creator, event.params.requestId)
   );
 
-  request.metadataURI = try_request.metadataURI;
   request.requestId = event.params.requestId;
   request.creator = creator.id;
   request.requester = try_request.requester;
@@ -118,8 +104,7 @@ export function handleNewRequest(event: NewRequest): void {
   request.createdTimestamp = event.block.timestamp;
   request.updatedTimestamp = event.block.timestamp;
 
-  const data = getJsonFromIpfs(try_request.metadataURI);
-  const checkData = json.try_fromBytes(data);
+  let checkData = json.try_fromString(event.params.jsondata);
   if (checkData.isOk) {
     let data = checkData.value.toObject();
 
@@ -177,32 +162,13 @@ export function handleMigrationCreator(event: MigrationCreator): void {
     let creator = getOrCreateCreator(creatorAddress);
     let exchange = CliptoExchangeV1.bind(event.address);
 
-    let try_creator = readValueFromCreatorStruct(
-      exchange.try_getCreator(creatorAddress)
-    );
+    let nft = exchange.getCreator(creatorAddress)
 
-    creator.metadataURI = try_creator.metadataURI;
-    creator.nftTokenAddress = try_creator.nft;
+    creator.nftTokenAddress = nft;
     creator.address = creatorAddress;
-
-    const data = getJsonFromIpfs(try_creator.metadataURI);
-    const checkData = json.try_fromBytes(data as Bytes);
-    if (checkData.isOk) {
-      let data = checkData.value.toObject();
-
-      creator.cat = true;
-      creator.twitterHandle = getString(data.get("twitterHandle"));
-      creator.bio = getString(data.get("bio"));
-      creator.deliveryTime = getInt(data.get("deliveryTime"));
-      creator.profilePicture = getString(data.get("profilePicture"));
-      creator.userName = getString(data.get("userName"));
-      creator.price = getDecimal(data.get("price"));
-      creator.businessPrice = getDecimal(data.get("businessPrice"));
-      creator.demos = getArray(data.get("demos"));
-    }
 
     creator.save();
 
-    beginNFTContractSync(try_creator.nft, event, creator.id, Version.v1);
+    beginNFTContractSync(nft, event, creator.id, Version.v1);
   }
 }

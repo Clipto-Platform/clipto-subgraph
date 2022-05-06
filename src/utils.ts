@@ -9,7 +9,6 @@ import {
   log,
 } from "@graphprotocol/graph-ts";
 import {
-  CliptoExchangeV1__getCreatorResultValue0Struct,
   CliptoExchangeV1__getRequestResultValue0Struct,
 } from "../generated/CliptoExchangeV1/CliptoExchangeV1";
 import { BIGINT_ZERO, NULL_ADDRESS } from "./constant";
@@ -57,15 +56,6 @@ export function readValue<T>(call: ethereum.CallResult<T>, defaultValue: T): T {
   return call.reverted ? defaultValue : call.value;
 }
 
-export function readValueFromCreatorStruct(
-  call: ethereum.CallResult<CliptoExchangeV1__getCreatorResultValue0Struct>
-): CreatorStruct {
-  if (call.reverted) {
-    return new CreatorStruct(NULL_ADDRESS, "");
-  }
-  return new CreatorStruct(call.value.nft, call.value.metadataURI);
-}
-
 export function readValueFromRequestStruct(
   call: ethereum.CallResult<CliptoExchangeV1__getRequestResultValue0Struct>
 ): RequestStruct {
@@ -76,7 +66,6 @@ export function readValueFromRequestStruct(
       NULL_ADDRESS,
       BIGINT_ZERO,
       false,
-      ""
     );
   }
 
@@ -86,7 +75,6 @@ export function readValueFromRequestStruct(
     call.value.erc20,
     call.value.amount,
     call.value.fulfilled,
-    call.value.metadataURI
   );
 }
 
