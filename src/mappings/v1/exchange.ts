@@ -184,9 +184,6 @@ export function handleMigrationCreator(event: MigrationCreator): void {
     creator.metadataURI = try_creator.metadataURI;
     creator.nftTokenAddress = try_creator.nft;
     creator.address = creatorAddress;
-    creator.txHash = event.transaction.hash;
-    creator.block = event.block.number;
-    creator.timestamp = event.block.timestamp;
 
     const data = getJsonFromIpfs(try_creator.metadataURI);
     const checkData = json.try_fromBytes(data as Bytes);
