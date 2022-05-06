@@ -51,7 +51,6 @@ export class RequestStruct {
   nftReceiver: Address;
   erc20: Address;
   fulfilled: bool;
-  metadataURI: string;
   amount: BigInt;
 
   constructor(
