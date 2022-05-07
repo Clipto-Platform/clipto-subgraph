@@ -1,12 +1,6 @@
 import { Address } from "@graphprotocol/graph-ts";
 import { Creator } from "../../generated/schema";
-import {
-  BIGINT_ZERO,
-  DEFAULT_BUSINESS_PRICE,
-  DEFAULT_PRICE,
-  NULL_ADDRESS,
-  Version,
-} from "../constant";
+import * as constant from "../constant";
 import { getOrCreatePlatform } from "./platform";
 
 export function getOrCreateCreator(id: Address): Creator {
@@ -19,24 +13,23 @@ export function getOrCreateCreator(id: Address): Creator {
   creator = new Creator(id.toHex());
 
   creator.address = id;
-  creator.nftTokenAddress = NULL_ADDRESS;
+  creator.nftTokenAddress = constant.NULL_ADDRESS;
   creator.metadataURI = "";
   creator.twitterHandle = "";
   creator.bio = "";
-  creator.deliveryTime = BIGINT_ZERO;
+  creator.deliveryTime = constant.BIGINT_ZERO;
   creator.demos = [];
   creator.profilePicture = "";
   creator.userName = "";
-  creator.price = DEFAULT_PRICE;
-  creator.businessPrice = DEFAULT_BUSINESS_PRICE;
-  creator.txHash = NULL_ADDRESS;
-  creator.block = BIGINT_ZERO;
-  creator.timestamp = BIGINT_ZERO;
-  creator.updated = BIGINT_ZERO;
-  creator.cat = false;
+  creator.price = constant.DEFAULT_PRICE;
+  creator.businessPrice = constant.DEFAULT_BUSINESS_PRICE;
+  creator.txHash = constant.NULL_ADDRESS;
+  creator.block = constant.BIGINT_ZERO;
+  creator.timestamp = constant.BIGINT_ZERO;
+  creator.updated = constant.BIGINT_ZERO;
   creator.save();
 
-  let platform = getOrCreatePlatform(Version.v1);
+  let platform = getOrCreatePlatform(constant.Version.v1);
 
   platform.totalCreators = platform.totalCreators + 1;
   platform.save();

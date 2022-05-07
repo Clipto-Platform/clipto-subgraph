@@ -1,31 +1,16 @@
-import { Address, Bytes, json } from "@graphprotocol/graph-ts";
+import { Address, json } from "@graphprotocol/graph-ts";
 import { ERC721 } from "../../../generated/CliptoExchange/ERC721";
-import {
-  CliptoExchangeV1,
-  CreatorRegistered,
-  CreatorUpdated,
-  DeliveredRequest,
-  MigrationCreator,
-  NewRequest,
-  RefundedRequest,
-} from "../../../generated/CliptoExchangeV1/CliptoExchangeV1";
+import * as CliptoExchangeV1 from "../../../generated/CliptoExchangeV1/CliptoExchangeV1";
 import { Version } from "../../constant";
 import { getOrCreateCreator } from "../../entities/creator";
 import { getOrCreatePlatform } from "../../entities/platform";
 import { getOrCreateRequest } from "../../entities/request";
-import {
-  getArray,
-  getBoolean,
-  getDecimal,
-  getInt,
-  getJsonFromIpfs,
-  getString,
-  readValue,
-  readValueFromRequestStruct,
-} from "../../utils";
+import * as utils from "../../utils";
 import { beginNFTContractSync } from "../token";
 
-export function handleCreatorRegistered(event: CreatorRegistered): void {
+export function handleCreatorRegistered(
+  event: CliptoExchangeV1.CreatorRegistered
+): void {
   getOrCreatePlatform(Version.v1);
 
   let creator = getOrCreateCreator(event.params.creator);
@@ -39,14 +24,14 @@ export function handleCreatorRegistered(event: CreatorRegistered): void {
   if (checkData.isOk) {
     let data = checkData.value.toObject();
 
-    creator.twitterHandle = getString(data.get("twitterHandle"));
-    creator.bio = getString(data.get("bio"));
-    creator.deliveryTime = getInt(data.get("deliveryTime"));
-    creator.profilePicture = getString(data.get("profilePicture"));
-    creator.userName = getString(data.get("userName"));
-    creator.price = getDecimal(data.get("price"));
-    creator.businessPrice = getDecimal(data.get("businessPrice"));
-    creator.demos = getArray(data.get("demos"));
+    creator.twitterHandle = utils.getString(data.get("twitterHandle"));
+    creator.bio = utils.getString(data.get("bio"));
+    creator.deliveryTime = utils.getInt(data.get("deliveryTime"));
+    creator.profilePicture = utils.getString(data.get("profilePicture"));
+    creator.userName = utils.getString(data.get("userName"));
+    creator.price = utils.getDecimal(data.get("price"));
+    creator.businessPrice = utils.getDecimal(data.get("businessPrice"));
+    creator.demos = utils.getArray(data.get("demos"));
   }
 
   creator.save();
@@ -54,7 +39,9 @@ export function handleCreatorRegistered(event: CreatorRegistered): void {
   beginNFTContractSync(event.params.nft, event, creator.id, Version.v1);
 }
 
-export function handleCreatorUpdated(event: CreatorUpdated): void {
+export function handleCreatorUpdated(
+  event: CliptoExchangeV1.CreatorUpdated
+): void {
   let creator = getOrCreateCreator(event.params.creator);
 
   creator.address = event.params.creator;
@@ -63,21 +50,21 @@ export function handleCreatorUpdated(event: CreatorUpdated): void {
   if (checkData.isOk) {
     let data = checkData.value.toObject();
 
-    creator.twitterHandle = getString(data.get("twitterHandle"));
-    creator.bio = getString(data.get("bio"));
-    creator.deliveryTime = getInt(data.get("deliveryTime"));
-    creator.profilePicture = getString(data.get("profilePicture"));
-    creator.userName = getString(data.get("userName"));
-    creator.price = getDecimal(data.get("price"));
-    creator.businessPrice = getDecimal(data.get("businessPrice"));
-    creator.demos = getArray(data.get("demos"));
+    creator.twitterHandle = utils.getString(data.get("twitterHandle"));
+    creator.bio = utils.getString(data.get("bio"));
+    creator.deliveryTime = utils.getInt(data.get("deliveryTime"));
+    creator.profilePicture = utils.getString(data.get("profilePicture"));
+    creator.userName = utils.getString(data.get("userName"));
+    creator.price = utils.getDecimal(data.get("price"));
+    creator.businessPrice = utils.getDecimal(data.get("businessPrice"));
+    creator.demos = utils.getArray(data.get("demos"));
     creator.updated = event.block.timestamp;
   }
 
   creator.save();
 }
 
-export function handleNewRequest(event: NewRequest): void {
+export function handleNewRequest(event: CliptoExchangeV1.NewRequest): void {
   let creator = getOrCreateCreator(event.params.creator);
   let request = getOrCreateRequest(
     event.params.creator,
@@ -85,8 +72,8 @@ export function handleNewRequest(event: NewRequest): void {
     Version.v1
   );
 
-  let exchange = CliptoExchangeV1.bind(event.address);
-  let try_request = readValueFromRequestStruct(
+  let exchange = CliptoExchangeV1.CliptoExchangeV1.bind(event.address);
+  let try_request = utils.readValueFromRequestStruct(
     exchange.try_getRequest(event.params.creator, event.params.requestId)
   );
 
@@ -108,15 +95,17 @@ export function handleNewRequest(event: NewRequest): void {
   if (checkData.isOk) {
     let data = checkData.value.toObject();
 
-    request.isBusiness = getBoolean(data.get("isBusiness"));
-    request.description = getString(data.get("description"));
-    request.deadline = getInt(data.get("deadline"));
+    request.isBusiness = utils.getBoolean(data.get("isBusiness"));
+    request.description = utils.getString(data.get("description"));
+    request.deadline = utils.getInt(data.get("deadline"));
   }
 
   request.save();
 }
 
-export function handleDeliveredRequest(event: DeliveredRequest): void {
+export function handleDeliveredRequest(
+  event: CliptoExchangeV1.DeliveredRequest
+): void {
   let request = getOrCreateRequest(
     event.params.creator,
     event.params.requestId.toString(),
@@ -132,7 +121,7 @@ export function handleDeliveredRequest(event: DeliveredRequest): void {
   let erc721Contract = ERC721.bind(
     Address.fromString(request.nftTokenAddress.toHex())
   );
-  request.nftTokenUri = readValue<string>(
+  request.nftTokenUri = utils.readValue<string>(
     erc721Contract.try_tokenURI(event.params.nftTokenId),
     ""
   );
@@ -140,7 +129,9 @@ export function handleDeliveredRequest(event: DeliveredRequest): void {
   request.save();
 }
 
-export function handleRefundedRequest(event: RefundedRequest): void {
+export function handleRefundedRequest(
+  event: CliptoExchangeV1.RefundedRequest
+): void {
   let request = getOrCreateRequest(
     event.params.creator,
     event.params.requestId.toString(),
@@ -154,19 +145,19 @@ export function handleRefundedRequest(event: RefundedRequest): void {
   request.save();
 }
 
-export function handleMigrationCreator(event: MigrationCreator): void {
+export function handleMigrationCreator(
+  event: CliptoExchangeV1.MigrationCreator
+): void {
   getOrCreatePlatform(Version.v1);
 
   for (let index = 0; index < event.params.creators.length; index++) {
     let creatorAddress = event.params.creators[index];
     let creator = getOrCreateCreator(creatorAddress);
-    let exchange = CliptoExchangeV1.bind(event.address);
+    let exchange = CliptoExchangeV1.CliptoExchangeV1.bind(event.address);
 
-    let nft = exchange.getCreator(creatorAddress)
+    let nft = exchange.getCreator(creatorAddress);
 
     creator.nftTokenAddress = nft;
-    creator.address = creatorAddress;
-
     creator.save();
 
     beginNFTContractSync(nft, event, creator.id, Version.v1);
