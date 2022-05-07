@@ -2,6 +2,7 @@ specVersion: 0.0.2
 schema:
   file: ./schema.graphql
 dataSources:
+{{ #v0 }}
   - kind: ethereum
     name: CliptoExchange
     network: {{ chain }}
@@ -14,8 +15,13 @@ dataSources:
       apiVersion: 0.0.5
       language: wasm/assemblyscript
       entities:
+        - Platform
+        - Account
         - Creator
         - Request
+        - NFTContract
+        - CliptoToken
+        - Transfer
       abis:
         - name: CliptoExchange
           file: ./abis/CliptoExchange.json
@@ -34,4 +40,73 @@ dataSources:
           handler: handleRefundedRequest
         - event: RequestUpdated(indexed address,indexed address,uint256,uint256)
           handler: handleRequestUpdated
-      file: ./src/mapping.ts
+      file: ./src/mappings/v0/exchange.ts
+  {{ /v0 }}
+
+  {{ #v1 }}
+  - kind: ethereum
+    name: CliptoExchangeV1
+    network: {{ chain }}
+    source:
+      address: "{{ address }}"
+      abi: CliptoExchangeV1
+      startBlock: {{ startBlock }}
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.5
+      language: wasm/assemblyscript
+      entities:
+        - Platform
+        - Account
+        - Creator
+        - Request
+        - NFTContract
+        - CliptoToken
+        - Transfer
+      abis:
+        - name: CliptoExchangeV1
+          file: ./abis/CliptoExchangeV1.json
+        - name: ERC721
+          file: ./abis/ERC721.json
+      eventHandlers:
+        - event: CreatorRegistered(indexed address,indexed address,string)
+          handler: handleCreatorRegistered
+        - event: CreatorUpdated(indexed address,string)
+          handler: handleCreatorUpdated
+        - event: DeliveredRequest(indexed address,uint256,uint256)
+          handler: handleDeliveredRequest
+        - event: MigrationCreator(address[])
+          handler: handleMigrationCreator
+        - event: NewRequest(indexed address,uint256,string)
+          handler: handleNewRequest
+        - event: RefundedRequest(indexed address,uint256)
+          handler: handleRefundedRequest
+      file: ./src/mappings/v1/exchange.ts
+  {{ /v1 }}
+
+
+templates:
+  - kind: ethereum
+    name: CliptoToken
+    network: {{ chain }}
+    source:
+      abi: ERC721
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.5
+      language: wasm/assemblyscript
+      entities:
+        - Platform
+        - Account
+        - Creator
+        - Request
+        - NFTContract
+        - CliptoToken
+        - Transfer
+      abis:
+        - name: ERC721
+          file: ./abis/ERC721.json
+      eventHandlers:
+        - event: Transfer(indexed address,indexed address,indexed uint256)
+          handler: handleTransfer
+      file: ./src/mappings/token.ts
