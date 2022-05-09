@@ -145,6 +145,22 @@ export function handleRefundedRequest(
   request.save();
 }
 
+export function handleRejectedRequest(
+  event: CliptoExchangeV1.RejectRequest
+): void {
+  let request = getOrCreateRequest(
+    event.params.creator,
+    event.params.requestId.toString(),
+    Version.v1
+  );
+
+  request.txHash = event.transaction.hash;
+  request.block = event.block.number;
+  request.updatedTimestamp = event.block.timestamp;
+  request.rejected = true;
+  request.save();
+}
+
 export function handleMigrationCreator(
   event: CliptoExchangeV1.MigrationCreator
 ): void {
