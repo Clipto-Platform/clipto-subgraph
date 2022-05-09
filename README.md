@@ -54,3 +54,27 @@ $ graph deploy --product hosted-service <username/subgraph name>
     }
 }
 ```
+
+2. To get all transfer history for particular token
+```graphql
+{
+    transfers(
+        where: {
+            nftContract: "0x123....."
+            tokenId: 0
+        }) {
+            id
+            from
+            to
+            tokenId
+            cliptoToken {
+                currentOwner
+            }
+            nftContract
+            eventType
+            blockNumber
+            timestamp
+        }
+    )
+}
+```

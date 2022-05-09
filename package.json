@@ -11,10 +11,12 @@
     "deploy-local": "graph deploy --node http://localhost:8020/ --ipfs http://localhost:5001 Clipto-Platform/clipto-subgraph",
     "format": "prettier --write \"src/**/*.ts\"",
     "lint": "eslint \"src/**/*.ts\" --fix",
-    "codegen": "graph codegen subgraph.yaml",
+    "codegen": "rm -rf generated && graph codegen subgraph.yaml",
     "build": "rm -rf build && graph build subgraph.yaml",
     "prepare:mainnet": "mustache config/mainnet.json subgraph.template.yaml > subgraph.yaml",
     "prepare:testnet": "mustache config/testnet.json subgraph.template.yaml > subgraph.yaml",
+    "deploy:testnet": "graph deploy --product hosted-service clipto-platform/clipto-subgraph-tstnet",
+    "deploy:mainnet": "graph deploy --product hosted-service clipto-platform/clipto-subgraph-mainnet",
     "test": "graph test"
   },
   "dependencies": {
