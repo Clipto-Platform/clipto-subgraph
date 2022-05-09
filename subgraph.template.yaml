@@ -81,6 +81,8 @@ dataSources:
           handler: handleNewRequest
         - event: RefundedRequest(indexed address,uint256)
           handler: handleRefundedRequest
+        - event: RejectRequest(indexed address,uint256)
+          handler: handleRejectedRequest
       file: ./src/mappings/v1/exchange.ts
   {{ /v1 }}
 

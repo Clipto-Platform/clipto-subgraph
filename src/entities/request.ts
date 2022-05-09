@@ -35,6 +35,7 @@ export function getOrCreateRequest(
   request.refunded = false;
   request.delivered = false;
   request.isBusiness = false;
+  request.rejected = false;
   request.description = "";
   request.deadline = BIGINT_ZERO;
   request.txHash = NULL_ADDRESS;
