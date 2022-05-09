@@ -15,6 +15,8 @@
     "build": "rm -rf build && graph build subgraph.yaml",
     "prepare:mainnet": "mustache config/mainnet.json subgraph.template.yaml > subgraph.yaml",
     "prepare:testnet": "mustache config/testnet.json subgraph.template.yaml > subgraph.yaml",
+    "deploy:testnet": "graph deploy --product hosted-service clipto-platform/clipto-subgraph-tstnet",
+    "deploy:mainnet": "graph deploy --product hosted-service clipto-platform/clipto-subgraph-mainnet",
     "test": "graph test"
   },
   "dependencies": {
