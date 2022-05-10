@@ -16,6 +16,7 @@ export function getOrCreateCreator(id: Address): Creator {
   creator.nftTokenAddress = constant.NULL_ADDRESS;
   creator.metadataURI = "";
   creator.twitterHandle = "";
+  creator.lensHandle = "";
   creator.bio = "";
   creator.deliveryTime = constant.BIGINT_ZERO;
   creator.demos = [];

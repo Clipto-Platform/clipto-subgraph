@@ -42,6 +42,9 @@ type Creator @entity {
   " twitter handle of the creator "
   twitterHandle: String!
 
+  " lens handle of the creator "
+  lensHandle: String!
+
   " bio description of the creator "
   bio: String!
 
