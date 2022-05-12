@@ -101,10 +101,6 @@ export function handleNewRequest(event: CliptoExchangeV1.NewRequest): void {
     let data = checkData.value.toObject();
 
     request.isBusiness = utils.getBoolean(data.get("isBusiness"));
-    request.businessName = utils.getString(data.get("businessName"));
-    request.businessEmail = utils.getString(data.get("businessEmail"));
-    request.businessTwitter = utils.getString(data.get("businessTwitter"));
-    request.businessInfo = utils.getString(data.get("businessInfo"));
     request.description = utils.getString(data.get("description"));
     request.deadline = utils.getInt(data.get("deadline"));
   }

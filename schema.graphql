@@ -140,18 +140,6 @@ type Request @entity {
   " description/instruction for the request "
   description: String!
 
-  " business name for business type request"
-  businessName: String!
-
-  " business email for business type request "
-  businessEmail: String!
-
-  " business twitter for business type request "
-  businessTwitter: String!
-
-  " business details for business type request "
-  businessInfo: String!
-
   " deadline for the request, no of days after the creation "
   deadline: BigInt!
 
