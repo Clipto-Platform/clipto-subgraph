@@ -25,6 +25,7 @@ export function handleCreatorRegistered(
     let data = checkData.value.toObject();
 
     creator.twitterHandle = utils.getString(data.get("twitterHandle"));
+    creator.lensHandle = utils.getString(data.get("lensHandle"));
     creator.bio = utils.getString(data.get("bio"));
     creator.deliveryTime = utils.getInt(data.get("deliveryTime"));
     creator.profilePicture = utils.getString(data.get("profilePicture"));
@@ -45,12 +46,16 @@ export function handleCreatorUpdated(
   let creator = getOrCreateCreator(event.params.creator);
 
   creator.address = event.params.creator;
+  creator.txHash = event.transaction.hash;
+  creator.block = event.block.number;
+  creator.timestamp = event.block.timestamp;
 
   let checkData = json.try_fromString(event.params.jsondata);
   if (checkData.isOk) {
     let data = checkData.value.toObject();
 
     creator.twitterHandle = utils.getString(data.get("twitterHandle"));
+    creator.lensHandle = utils.getString(data.get("lensHandle"));
     creator.bio = utils.getString(data.get("bio"));
     creator.deliveryTime = utils.getInt(data.get("deliveryTime"));
     creator.profilePicture = utils.getString(data.get("profilePicture"));
@@ -96,6 +101,10 @@ export function handleNewRequest(event: CliptoExchangeV1.NewRequest): void {
     let data = checkData.value.toObject();
 
     request.isBusiness = utils.getBoolean(data.get("isBusiness"));
+    request.businessName = utils.getString(data.get("businessName"));
+    request.businessEmail = utils.getString(data.get("businessEmail"));
+    request.businessTwitter = utils.getString(data.get("businessTwitter"));
+    request.businessInfo = utils.getString(data.get("businessInfo"));
     request.description = utils.getString(data.get("description"));
     request.deadline = utils.getInt(data.get("deadline"));
   }

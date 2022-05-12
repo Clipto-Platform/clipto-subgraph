@@ -8,11 +8,8 @@ import {
   JSONValueKind,
   log,
 } from "@graphprotocol/graph-ts";
-import {
-  CliptoExchangeV1__getRequestResultValue0Struct,
-} from "../generated/CliptoExchangeV1/CliptoExchangeV1";
+import { CliptoExchangeV1__getRequestResultValue0Struct } from "../generated/CliptoExchangeV1/CliptoExchangeV1";
 import { BIGINT_ZERO, NULL_ADDRESS } from "./constant";
-import { CreatorStruct } from "./entities/creator";
 import { RequestStruct } from "./entities/request";
 
 export function getString(value: JSONValue | null): string {
@@ -65,7 +62,7 @@ export function readValueFromRequestStruct(
       NULL_ADDRESS,
       NULL_ADDRESS,
       BIGINT_ZERO,
-      false,
+      false
     );
   }
 
@@ -74,7 +71,7 @@ export function readValueFromRequestStruct(
     call.value.nftReceiver,
     call.value.erc20,
     call.value.amount,
-    call.value.fulfilled,
+    call.value.fulfilled
   );
 }
 
