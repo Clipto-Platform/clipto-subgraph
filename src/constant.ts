@@ -20,4 +20,4 @@ export const BIGINT_ZERO = BigInt.fromI32(0);
 export const BIGDECIMAL_ZERO = new BigDecimal(BIGINT_ZERO);
 
 export const DEFAULT_PRICE = BigDecimal.fromString("0.5");
-export const DEFAULT_BUSINESS_PRICE = BigDecimal.fromString("1");
+export const DEFAULT_BUSINESS_PRICE = BigDecimal.fromString("0");
