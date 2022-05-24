@@ -66,6 +66,9 @@ type Creator @entity {
   " min price for business requests "
   businessPrice: BigDecimal!
 
+  " creator's business services "
+  customServices: [String!]!
+
   " transaction hash of the creator creation and updation "
   txHash: Bytes!
 
@@ -151,6 +154,9 @@ type Request @entity {
 
   " business details for business type request "
   businessInfo: String!
+
+  " buisness request type"
+  businessRequestType: String!
 
   " deadline for the request, no of days after the creation "
   deadline: BigInt!
