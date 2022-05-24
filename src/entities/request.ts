@@ -41,6 +41,7 @@ export function getOrCreateRequest(
   request.businessTwitter = "";
   request.businessName = "";
   request.businessInfo = "";
+  request.businessRequestType = "";
   request.deadline = BIGINT_ZERO;
   request.txHash = NULL_ADDRESS;
   request.block = BIGINT_ZERO;
