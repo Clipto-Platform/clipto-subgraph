@@ -32,6 +32,7 @@ export function handleCreatorRegistered(
     creator.userName = utils.getString(data.get("userName"));
     creator.price = utils.getDecimal(data.get("price"));
     creator.businessPrice = utils.getDecimal(data.get("businessPrice"));
+    creator.customServices = utils.getArray(data.get("customServices"));
     creator.demos = utils.getArray(data.get("demos"));
   }
 
@@ -62,6 +63,7 @@ export function handleCreatorUpdated(
     creator.userName = utils.getString(data.get("userName"));
     creator.price = utils.getDecimal(data.get("price"));
     creator.businessPrice = utils.getDecimal(data.get("businessPrice"));
+    creator.customServices = utils.getArray(data.get("customServices"));
     creator.demos = utils.getArray(data.get("demos"));
     creator.updated = event.block.timestamp;
   }
@@ -101,6 +103,9 @@ export function handleNewRequest(event: CliptoExchangeV1.NewRequest): void {
     let data = checkData.value.toObject();
 
     request.isBusiness = utils.getBoolean(data.get("isBusiness"));
+    request.businessRequestType = utils.getString(
+      data.get("businessRequestType")
+    );
     request.businessName = utils.getString(data.get("businessName"));
     request.businessEmail = utils.getString(data.get("businessEmail"));
     request.businessTwitter = utils.getString(data.get("businessTwitter"));

@@ -24,6 +24,7 @@ export function getOrCreateCreator(id: Address): Creator {
   creator.userName = "";
   creator.price = constant.DEFAULT_PRICE;
   creator.businessPrice = constant.DEFAULT_BUSINESS_PRICE;
+  creator.customServices = [];
   creator.txHash = constant.NULL_ADDRESS;
   creator.block = constant.BIGINT_ZERO;
   creator.timestamp = constant.BIGINT_ZERO;
