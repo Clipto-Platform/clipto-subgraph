@@ -49,7 +49,7 @@ export function handleCreatorUpdated(
   creator.address = event.params.creator;
   creator.txHash = event.transaction.hash;
   creator.block = event.block.number;
-  creator.timestamp = event.block.timestamp;
+  creator.updated = event.block.timestamp;
 
   let checkData = json.try_fromString(event.params.jsondata);
   if (checkData.isOk) {
@@ -65,7 +65,6 @@ export function handleCreatorUpdated(
     creator.businessPrice = utils.getDecimal(data.get("businessPrice"));
     creator.customServices = utils.getArray(data.get("customServices"));
     creator.demos = utils.getArray(data.get("demos"));
-    creator.updated = event.block.timestamp;
   }
 
   creator.save();
