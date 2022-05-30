@@ -25,12 +25,14 @@ export function handleCreatorRegistered(
     let data = checkData.value.toObject();
 
     creator.twitterHandle = utils.getString(data.get("twitterHandle"));
+    creator.lensHandle = utils.getString(data.get("lensHandle"));
     creator.bio = utils.getString(data.get("bio"));
     creator.deliveryTime = utils.getInt(data.get("deliveryTime"));
     creator.profilePicture = utils.getString(data.get("profilePicture"));
     creator.userName = utils.getString(data.get("userName"));
     creator.price = utils.getDecimal(data.get("price"));
     creator.businessPrice = utils.getDecimal(data.get("businessPrice"));
+    creator.customServices = utils.getArray(data.get("customServices"));
     creator.demos = utils.getArray(data.get("demos"));
   }
 
@@ -45,20 +47,24 @@ export function handleCreatorUpdated(
   let creator = getOrCreateCreator(event.params.creator);
 
   creator.address = event.params.creator;
+  creator.txHash = event.transaction.hash;
+  creator.block = event.block.number;
+  creator.updated = event.block.timestamp;
 
   let checkData = json.try_fromString(event.params.jsondata);
   if (checkData.isOk) {
     let data = checkData.value.toObject();
 
     creator.twitterHandle = utils.getString(data.get("twitterHandle"));
+    creator.lensHandle = utils.getString(data.get("lensHandle"));
     creator.bio = utils.getString(data.get("bio"));
     creator.deliveryTime = utils.getInt(data.get("deliveryTime"));
     creator.profilePicture = utils.getString(data.get("profilePicture"));
     creator.userName = utils.getString(data.get("userName"));
     creator.price = utils.getDecimal(data.get("price"));
     creator.businessPrice = utils.getDecimal(data.get("businessPrice"));
+    creator.customServices = utils.getArray(data.get("customServices"));
     creator.demos = utils.getArray(data.get("demos"));
-    creator.updated = event.block.timestamp;
   }
 
   creator.save();
@@ -96,6 +102,13 @@ export function handleNewRequest(event: CliptoExchangeV1.NewRequest): void {
     let data = checkData.value.toObject();
 
     request.isBusiness = utils.getBoolean(data.get("isBusiness"));
+    request.businessRequestType = utils.getString(
+      data.get("businessRequestType")
+    );
+    request.businessName = utils.getString(data.get("businessName"));
+    request.businessEmail = utils.getString(data.get("businessEmail"));
+    request.businessTwitter = utils.getString(data.get("businessTwitter"));
+    request.businessInfo = utils.getString(data.get("businessInfo"));
     request.description = utils.getString(data.get("description"));
     request.deadline = utils.getInt(data.get("deadline"));
   }

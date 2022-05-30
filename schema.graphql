@@ -42,6 +42,9 @@ type Creator @entity {
   " twitter handle of the creator "
   twitterHandle: String!
 
+  " lens handle of the creator "
+  lensHandle: String!
+
   " bio description of the creator "
   bio: String!
 
@@ -62,6 +65,9 @@ type Creator @entity {
 
   " min price for business requests "
   businessPrice: BigDecimal!
+
+  " creator's business services "
+  customServices: [String!]!
 
   " transaction hash of the creator creation and updation "
   txHash: Bytes!
@@ -136,6 +142,21 @@ type Request @entity {
 
   " description/instruction for the request "
   description: String!
+
+  " business name for business type request"
+  businessName: String!
+
+  " business email for business type request "
+  businessEmail: String!
+
+  " business twitter for business type request "
+  businessTwitter: String!
+
+  " business details for business type request "
+  businessInfo: String!
+
+  " buisness request type"
+  businessRequestType: String!
 
   " deadline for the request, no of days after the creation "
   deadline: BigInt!

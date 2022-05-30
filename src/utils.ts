@@ -1,63 +1,64 @@
-import {
-  BigDecimal,
-  BigInt,
-  Bytes,
-  ethereum,
-  ipfs,
-  JSONValue,
-  JSONValueKind,
-  log,
-} from "@graphprotocol/graph-ts";
-import {
-  CliptoExchangeV1__getRequestResultValue0Struct,
-} from "../generated/CliptoExchangeV1/CliptoExchangeV1";
-import { BIGINT_ZERO, NULL_ADDRESS } from "./constant";
-import { CreatorStruct } from "./entities/creator";
+import * as graphTs from "@graphprotocol/graph-ts";
+import { CliptoExchangeV1__getRequestResultValue0Struct } from "../generated/CliptoExchangeV1/CliptoExchangeV1";
+import { BIGDECIMAL_ZERO, BIGINT_ZERO, NULL_ADDRESS } from "./constant";
 import { RequestStruct } from "./entities/request";
 
-export function getString(value: JSONValue | null): string {
+export function getString(value: graphTs.JSONValue | null): string {
   if (!value) return "";
-  if (value.kind == JSONValueKind.STRING) return value.toString();
+  if (value.kind == graphTs.JSONValueKind.STRING) return value.toString();
   return value.data.toString();
 }
 
-export function getBoolean(value: JSONValue | null): boolean {
+export function getBoolean(value: graphTs.JSONValue | null): boolean {
   if (!value) return false;
-  if (value.kind == JSONValueKind.BOOL) return value.toBool();
-  if (value.kind == JSONValueKind.NUMBER) {
+  if (value.kind == graphTs.JSONValueKind.BOOL) return value.toBool();
+  if (value.kind == graphTs.JSONValueKind.NUMBER) {
     return value.toI64() == 0 ? false : true;
   }
-  return BigInt.fromString(value.data.toString()) == BIGINT_ZERO ? false : true;
+  return graphTs.BigInt.fromString(value.data.toString()) == BIGINT_ZERO
+    ? false
+    : true;
 }
 
-export function getInt(value: JSONValue | null): BigInt {
-  if (!value) return BigInt.fromI64(-1);
-  if (value.kind == JSONValueKind.STRING)
-    return BigInt.fromString(value.toString());
-  if (value.kind == JSONValueKind.NUMBER) return value.toBigInt();
-  return BigInt.fromI64(value.data);
+export function getInt(value: graphTs.JSONValue | null): graphTs.BigInt {
+  if (!value) return graphTs.BigInt.fromI64(-1);
+  if (value.kind == graphTs.JSONValueKind.STRING) {
+    if (value.toString().length == 0) return BIGINT_ZERO;
+    return graphTs.BigInt.fromString(value.toString());
+  }
+  if (value.kind == graphTs.JSONValueKind.NUMBER) return value.toBigInt();
+  return graphTs.BigInt.fromI64(value.data);
 }
 
-export function getDecimal(value: JSONValue | null): BigDecimal {
-  if (!value) return BigDecimal.fromString("0");
-  if (value.kind == JSONValueKind.STRING)
-    return BigDecimal.fromString(value.toString());
-  if (value.kind == JSONValueKind.NUMBER)
-    return BigDecimal.fromString(value.toF64().toString());
-  return BigDecimal.fromString("0");
+export function getDecimal(
+  value: graphTs.JSONValue | null
+): graphTs.BigDecimal {
+  if (!value) return graphTs.BigDecimal.fromString("0");
+  if (value.kind == graphTs.JSONValueKind.STRING) {
+    if (value.toString().length == 0) return BIGDECIMAL_ZERO;
+    return graphTs.BigDecimal.fromString(value.toString());
+  }
+  if (value.kind == graphTs.JSONValueKind.NUMBER)
+    return graphTs.BigDecimal.fromString(value.toF64().toString());
+  return graphTs.BigDecimal.fromString("0");
 }
 
-export function getArray(value: JSONValue | null): Array<string> {
+export function getArray(value: graphTs.JSONValue | null): Array<string> {
   if (!value) return new Array<string>();
   return value.toArray().map<string>((v) => getString(v));
 }
 
-export function readValue<T>(call: ethereum.CallResult<T>, defaultValue: T): T {
+export function readValue<T>(
+  call: graphTs.ethereum.CallResult<T>,
+  defaultValue: T
+): T {
   return call.reverted ? defaultValue : call.value;
 }
 
 export function readValueFromRequestStruct(
-  call: ethereum.CallResult<CliptoExchangeV1__getRequestResultValue0Struct>
+  call: graphTs.ethereum.CallResult<
+    CliptoExchangeV1__getRequestResultValue0Struct
+  >
 ): RequestStruct {
   if (call.reverted) {
     return new RequestStruct(
@@ -65,7 +66,7 @@ export function readValueFromRequestStruct(
       NULL_ADDRESS,
       NULL_ADDRESS,
       BIGINT_ZERO,
-      false,
+      false
     );
   }
 
@@ -74,17 +75,17 @@ export function readValueFromRequestStruct(
     call.value.nftReceiver,
     call.value.erc20,
     call.value.amount,
-    call.value.fulfilled,
+    call.value.fulfilled
   );
 }
 
-export function getJsonFromIpfs(metadataURI: string): Bytes {
+export function getJsonFromIpfs(metadataURI: string): graphTs.Bytes {
   const hash = metadataURI.split("//");
-  const result = ipfs.cat(hash[1]);
+  const result = graphTs.ipfs.cat(hash[1]);
 
   if (!result) {
-    log.warning("[IPFS] ipfs cat failed {}", [metadataURI]);
-    return Bytes.empty();
+    graphTs.log.warning("[IPFS] ipfs cat failed {}", [metadataURI]);
+    return graphTs.Bytes.empty();
   }
   return result;
 }
