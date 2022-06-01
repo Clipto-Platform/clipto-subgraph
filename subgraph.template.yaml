@@ -81,8 +81,12 @@ dataSources:
           handler: handleNewRequest
         - event: RefundedRequest(indexed address,uint256)
           handler: handleRefundedRequest
-        - event: RejectRequest(indexed address,uint256)
-          handler: handleRejectedRequest
+        - event: NewBountyRequest(bytes32,string)
+          handler: handleNewBountyRequest
+        - event: DeliveredBountyRequest(indexed address,bytes32,uint256)
+          handler: handleDeliveredBountyRequest
+        - event: RefundedBountyRequest(bytes32)
+          handler: handleRefundedBountyRequest
       file: ./src/mappings/v1/exchange.ts
   {{ /v1 }}
 
