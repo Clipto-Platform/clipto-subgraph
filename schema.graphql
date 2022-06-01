@@ -174,6 +174,68 @@ type Request @entity {
   updatedTimestamp: BigInt!
 }
 
+type BountyRequest @entity {
+  " {request hash}"
+  id: ID!
+
+  " metadata uri "
+  metadataURI: String!
+
+  " hash of bounty request "
+  hash: String!
+
+  " creator's twitter handle"
+  twitterHandle: String!
+
+  " creator address for whom the request is made "
+  creator: Creator!
+
+  " user address who made the request "
+  requester: Bytes!
+
+  "nft token receiver"
+  nftReceiver: Bytes!
+
+  " amount in ether unit amount * 10 ^ 18 "
+  amount: BigInt!
+
+  " erc 20 token type used for the request "
+  erc20: Bytes!
+
+  " token id of the nft created for the request "
+  nftTokenId: BigInt!
+
+  " token uri for the nft metadata "
+  nftTokenUri: String!
+
+  " address of the nft contract of the creator  "
+  nftTokenAddress: Bytes!
+
+  " status of the refund made for the request "
+  refunded: Boolean!
+
+  " status for the completion of the request "
+  delivered: Boolean!
+
+  " description/instruction for the request "
+  description: String!
+
+  " deadline for the request, no of days after the creation "
+  deadline: BigInt!
+
+  " hash of the transaction the request was created and updated "
+  txHash: Bytes!
+
+  " block the request was made and updated "
+  block: BigInt!
+
+  " timestamp of the request creation "
+  createdTimestamp: BigInt!
+
+  " timestamp of request creation and updation "
+  updatedTimestamp: BigInt!
+}
+
 type NFTContract @entity {
   " Contract address "
   id: ID!
