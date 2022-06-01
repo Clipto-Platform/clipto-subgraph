@@ -1,10 +1,11 @@
 import { Address, json } from "@graphprotocol/graph-ts";
 import { ERC721 } from "../../../generated/CliptoExchange/ERC721";
 import * as CliptoExchangeV1 from "../../../generated/CliptoExchangeV1/CliptoExchangeV1";
+import { Request } from "../../../generated/schema";
 import { Version } from "../../constant";
 import { getOrCreateCreator } from "../../entities/creator";
 import { getOrCreatePlatform } from "../../entities/platform";
-import { getOrCreateRequest } from "../../entities/request";
+import { getOrCreateRequest, getOrCreateBountyRequest } from "../../entities/request";
 import * as utils from "../../utils";
 import { beginNFTContractSync } from "../token";
 
@@ -116,6 +117,7 @@ export function handleNewRequest(event: CliptoExchangeV1.NewRequest): void {
   request.save();
 }
 
+
 export function handleDeliveredRequest(
   event: CliptoExchangeV1.DeliveredRequest
 ): void {
@@ -158,19 +160,77 @@ export function handleRefundedRequest(
   request.save();
 }
 
-export function handleRejectedRequest(
-  event: CliptoExchangeV1.RejectRequest
+export function handleNewBountyRequest(event: CliptoExchangeV1.NewBountyRequest): void {
+  let request = getOrCreateBountyRequest(event.params.bountyHash.toString());
+
+  let exchange = CliptoExchangeV1.CliptoExchangeV1.bind(event.address);
+  let try_bountyRequest = utils.readValueFromRequestStruct(
+    exchange.try_getBountyRequest(event.params.bountyHash)
+  );
+  request.hash = event.params.bountyHash.toString();
+  request.requester = try_bountyRequest.requester;
+  request.nftReceiver = try_bountyRequest.nftReceiver;
+  request.amount = try_bountyRequest.amount;
+  request.erc20 = try_bountyRequest.erc20;
+  request.refunded = false;
+  request.delivered = false;
+  request.txHash = event.transaction.hash;
+  request.block = event.block.number;
+  request.createdTimestamp = event.block.timestamp;
+  request.updatedTimestamp = event.block.timestamp;
+  
+  let checkData = json.try_fromString(event.params.jsondata);
+
+  if(checkData.isOk){
+
+    let data = checkData.value.toObject();
+
+    request.description = utils.getString(data.get("description"));
+    request.deadline = utils.getInt(data.get("deadline"));
+    request.twitterHandle = utils.getString(data.get("twitterHandle"));
+
+  }
+  request.save();
+}
+
+export function handleDeliveredBountyRequest(
+  event: CliptoExchangeV1.DeliveredBountyRequest
 ): void {
-  let request = getOrCreateRequest(
-    event.params.creator,
-    event.params.requestId.toString(),
-    Version.v1
+  let request = getOrCreateBountyRequest(
+    event.params.bountyHash.toString()
+  );
+  let creator = getOrCreateCreator(event.params.creator);
+
+  request.creator = creator.id;
+  request.nftTokenId = event.params.nftTokenId;
+  request.nftTokenAddress = creator.nftTokenAddress;
+  request.delivered = true;
+  request.txHash = event.transaction.hash;
+  request.block = event.block.number;
+  request.updatedTimestamp = event.block.timestamp;
+
+  let erc721Contract = ERC721.bind(
+    Address.fromString(creator.nftTokenAddress.toHex())
+  );
+  request.nftTokenUri = utils.readValue<string>(
+    erc721Contract.try_tokenURI(event.params.nftTokenId),
+    ""
+  );
+
+  request.save();
+}
+
+export function handleRefundedBountyRequest(
+  event: CliptoExchangeV1.RefundedBountyRequest
+): void {
+  let request = getOrCreateBountyRequest(
+    event.params.bountyHash.toString()
   );
 
   request.txHash = event.transaction.hash;
   request.block = event.block.number;
   request.updatedTimestamp = event.block.timestamp;
-  request.rejected = true;
+  request.refunded = true;
   request.save();
 }
 

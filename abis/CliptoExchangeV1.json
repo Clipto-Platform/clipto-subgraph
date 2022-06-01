@@ -54,6 +54,31 @@
       },
       {
         "indexed": false,
+        "internalType": "bytes32",
+        "name": "bountyHash",
+        "type": "bytes32"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "nftTokenId",
+        "type": "uint256"
+      }
+    ],
+    "name": "DeliveredBountyRequest",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "creator",
+        "type": "address"
+      },
+      {
+        "indexed": false,
         "internalType": "uint256",
         "name": "requestId",
         "type": "uint256"
@@ -79,6 +104,25 @@
       }
     ],
     "name": "MigrationCreator",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "bytes32",
+        "name": "bountyHash",
+        "type": "bytes32"
+      },
+      {
+        "indexed": false,
+        "internalType": "string",
+        "name": "jsondata",
+        "type": "string"
+      }
+    ],
+    "name": "NewBountyRequest",
     "type": "event"
   },
   {
@@ -142,19 +186,13 @@
     "anonymous": false,
     "inputs": [
       {
-        "indexed": true,
-        "internalType": "address",
-        "name": "creator",
-        "type": "address"
-      },
-      {
         "indexed": false,
-        "internalType": "uint256",
-        "name": "requestId",
-        "type": "uint256"
+        "internalType": "bytes32",
+        "name": "bountyHash",
+        "type": "bytes32"
       }
     ],
-    "name": "RefundedRequest",
+    "name": "RefundedBountyRequest",
     "type": "event"
   },
   {
@@ -173,7 +211,7 @@
         "type": "uint256"
       }
     ],
-    "name": "RejectRequest",
+    "name": "RefundedRequest",
     "type": "event"
   },
   {
@@ -205,6 +243,45 @@
   {
     "inputs": [
       {
+        "internalType": "bytes32",
+        "name": "",
+        "type": "bytes32"
+      }
+    ],
+    "name": "bountyRequests",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "requester",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "nftReceiver",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "erc20",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "amount",
+        "type": "uint256"
+      },
+      {
+        "internalType": "bool",
+        "name": "fulfilled",
+        "type": "bool"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
         "internalType": "address",
         "name": "",
         "type": "address"
@@ -224,6 +301,24 @@
   {
     "inputs": [
       {
+        "internalType": "string",
+        "name": "hashWord",
+        "type": "string"
+      },
+      {
+        "internalType": "string",
+        "name": "_tokenURI",
+        "type": "string"
+      }
+    ],
+    "name": "deliverBountyRequest",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
         "internalType": "uint256",
         "name": "_requestId",
         "type": "uint256"
@@ -237,6 +332,65 @@
     "name": "deliverRequest",
     "outputs": [],
     "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "feeRecipient",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "bountyHash",
+        "type": "bytes32"
+      }
+    ],
+    "name": "getBountyRequest",
+    "outputs": [
+      {
+        "components": [
+          {
+            "internalType": "address",
+            "name": "requester",
+            "type": "address"
+          },
+          {
+            "internalType": "address",
+            "name": "nftReceiver",
+            "type": "address"
+          },
+          {
+            "internalType": "address",
+            "name": "erc20",
+            "type": "address"
+          },
+          {
+            "internalType": "uint256",
+            "name": "amount",
+            "type": "uint256"
+          },
+          {
+            "internalType": "bool",
+            "name": "fulfilled",
+            "type": "bool"
+          }
+        ],
+        "internalType": "struct CliptoExchangeStorage.Request",
+        "name": "",
+        "type": "tuple"
+      }
+    ],
+    "stateMutability": "view",
     "type": "function"
   },
   {
@@ -331,7 +485,7 @@
     "inputs": [
       {
         "internalType": "address",
-        "name": "_owner",
+        "name": "_feeRecipient",
         "type": "address"
       },
       {
@@ -366,6 +520,29 @@
   {
     "inputs": [
       {
+        "internalType": "bytes32",
+        "name": "bountyHash",
+        "type": "bytes32"
+      },
+      {
+        "internalType": "address",
+        "name": "_nftReceiver",
+        "type": "address"
+      },
+      {
+        "internalType": "string",
+        "name": "_jsonData",
+        "type": "string"
+      }
+    ],
+    "name": "nativeBountyNewRequest",
+    "outputs": [],
+    "stateMutability": "payable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
         "internalType": "address",
         "name": "_creator",
         "type": "address"
@@ -384,6 +561,39 @@
     "name": "nativeNewRequest",
     "outputs": [],
     "stateMutability": "payable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "bountyHash",
+        "type": "bytes32"
+      },
+      {
+        "internalType": "address",
+        "name": "_nftReceiver",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "_erc20",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_amount",
+        "type": "uint256"
+      },
+      {
+        "internalType": "string",
+        "name": "_jsonData",
+        "type": "string"
+      }
+    ],
+    "name": "newBountyRequest",
+    "outputs": [],
+    "stateMutability": "nonpayable",
     "type": "function"
   },
   {
@@ -455,6 +665,19 @@
   {
     "inputs": [
       {
+        "internalType": "string",
+        "name": "hashWord",
+        "type": "string"
+      }
+    ],
+    "name": "refundBountyRequest",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
         "internalType": "address",
         "name": "_creator",
         "type": "address"
@@ -484,19 +707,6 @@
       }
     ],
     "name": "registerCreator",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "_requestId",
-        "type": "uint256"
-      }
-    ],
-    "name": "rejectRequest",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -577,6 +787,19 @@
       }
     ],
     "name": "setFeeRate",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "_feeRecipient",
+        "type": "address"
+      }
+    ],
+    "name": "setFeeRecipient",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"

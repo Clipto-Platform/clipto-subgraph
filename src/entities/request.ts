@@ -1,5 +1,5 @@
 import { Address, BigInt } from "@graphprotocol/graph-ts";
-import { Request } from "../../generated/schema";
+import { Request, BountyRequest } from "../../generated/schema";
 import { BIGINT_ZERO, NULL_ADDRESS } from "../constant";
 
 export function getOrCreateRequest(
@@ -72,4 +72,37 @@ export class RequestStruct {
     this.amount = amount;
     this.fulfilled = fulfilled;
   }
+}
+
+export function getOrCreateBountyRequest(
+  hash: string
+): BountyRequest {
+  let request = BountyRequest.load(hash);
+
+  if (request) {
+    return request;
+  }
+
+  request = new BountyRequest(hash);
+
+  request.creator = "";
+  request.metadataURI = "";
+  request.requester = NULL_ADDRESS;
+  request.nftReceiver = NULL_ADDRESS;
+  request.erc20 = NULL_ADDRESS;
+  request.amount = BIGINT_ZERO;
+  request.nftTokenId = BIGINT_ZERO;
+  request.nftTokenUri = "";
+  request.nftTokenAddress = NULL_ADDRESS;
+  request.refunded = false;
+  request.delivered = false;
+  request.description = "";
+  request.deadline = BIGINT_ZERO;
+  request.txHash = NULL_ADDRESS;
+  request.block = BIGINT_ZERO;
+  request.createdTimestamp = BIGINT_ZERO;
+  request.updatedTimestamp = BIGINT_ZERO;
+  request.save();
+
+  return request;
 }
